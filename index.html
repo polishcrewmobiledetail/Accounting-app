@@ -435,7 +435,7 @@ function renderJobs(){
   const pkgs = Object.keys(state.menu.packages).map(p=>`<option>${esc(p)}</option>`).join("");
   jf.innerHTML = `
     <div class="row">
-      <div><label>Client</label><select id="jClient"><option value="">Select...</option>${clients}</select></div>
+      <div><label>Client</label><select id="jClient"><option value="">Select...</option>${clients}</select><div id="quickAddClient" class="small" style="margin-top:6px"></div></div>
       <div><label>Vehicle Size</label><select id="jSize">${VEHICLE_SIZES.map(s=>`<option>${s}</option>`)}</select></div>
       <div><label>Package</label><select id="jPkg">${pkgs}</select></div>
       <div><label>Date</label><input id="jDate" type="date" value="${today()}"></div>
@@ -468,6 +468,7 @@ function renderJobs(){
   g('jSize').onchange = autoBase;
   g('jClient').onchange = loadClientDiscount;
   autoBase(); buildJobAddons(); updateJobTotal();
+  quickAddClientUI();
   listJobs();
 }
 function today(){return new Date().toISOString().slice(0,10)}
@@ -535,7 +536,8 @@ function saveJob(){
     paid: 0,
     notes:g('jNotes').value||""
   };
-  state.jobs.push(job); save(); listJobs();
+  state.jobs.push(job); save(); quickAddClientUI();
+  listJobs();
   alert("Job saved as Quoted.");
 }
 function listJobs(){
@@ -565,7 +567,8 @@ function listJobs(){
   html += `</tbody></table>`;
   jl.innerHTML = html;
 }
-function setJobStatus(id, status){ const j = state.jobs.find(x=>x.id===id); if(!j) return; j.status = status; save(); listJobs(); }
+function setJobStatus(id, status){ const j = state.jobs.find(x=>x.id===id); if(!j) return; j.status = status; save(); quickAddClientUI();
+  listJobs(); }
 function jobQuote(id){
   const j = state.jobs.find(x=>x.id===id); if(!j) return;
   const c = state.clients.find(x=>x.id===j.clientId)||{};
@@ -619,10 +622,12 @@ function takePayment(id){
     method, clientId: j.clientId, note:`${j.packageName} ${j.vehicleSize} (Job ${j.id.slice(-6).toUpperCase()})`,
     items: [{name:j.packageName, price:j.basePrice}, ...j.addons], discount: j.discount
   };
-  state.transactions.push(tx); save(); listJobs(); renderTransactions(); refreshKPIs();
+  state.transactions.push(tx); save(); quickAddClientUI();
+  listJobs(); renderTransactions(); refreshKPIs();
   alert(`${currency(amount)} recorded via ${method}. ${j.status==='Paid'?'Job marked Paid.':''}`);
 }
-function deleteJob(id){ if(!confirm("Delete this job?")) return; state.jobs = state.jobs.filter(j=>j.id!==id); save(); listJobs(); }
+function deleteJob(id){ if(!confirm("Delete this job?")) return; state.jobs = state.jobs.filter(j=>j.id!==id); save(); quickAddClientUI();
+  listJobs(); }
 function editJob(id){
   const j = state.jobs.find(x=>x.id===id); if(!j) return;
   go("Jobs");
@@ -651,7 +656,8 @@ function editJob(id){
     j.addons = selectedAddons();
     j.total = updateJobTotal();
     j.notes = g('jNotes').value||"";
-    save(); listJobs(); alert("Job updated."); window.saveJob = old;
+    save(); quickAddClientUI();
+  listJobs(); alert("Job updated."); window.saveJob = old;
   }
 }
 
@@ -784,6 +790,48 @@ function download(blob, filename){ const a = document.createElement('a'); a.href
 // ------------ HELPERS -------------
 function g(id){return document.getElementById(id)}
 function esc(s){return (s==null?"":String(s)).replace(/[&<>"']/g, m=>({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;" }[m]))}
+
+
+// --- Quick Add Client (inline on Jobs) ---
+function quickAddClientUI(){
+  const target = document.getElementById('quickAddClient');
+  if(!target) return;
+  target.innerHTML = `
+    <details>
+      <summary class="small">+ Quick add client</summary>
+      <div class="row" style="margin-top:8px">
+        <div><label>Name</label><input id="qaName" placeholder="Client name"></div>
+        <div><label>Phone</label><input id="qaPhone" placeholder="(xxx) xxx-xxxx"></div>
+        <div><label>Email</label><input id="qaEmail" placeholder="email@client.com"></div>
+      </div>
+      <div class="row">
+        <div>
+          <label>Default Discount Type</label>
+          <select id="qaDType"><option value="none">None</option><option value="percent">% Percent</option><option value="flat">$ Flat</option></select>
+        </div>
+        <div><label>Default Discount Value</label><input id="qaDVal" type="number" step="1" placeholder="e.g., 15"></div>
+        <div style="align-self:end"><button class="btn" onclick="quickSaveClient()">Save & Select</button></div>
+      </div>
+    </details>
+  `;
+}
+function quickSaveClient(){
+  const name = (document.getElementById('qaName')?.value||'').trim();
+  if(!name){ alert('Name required'); return; }
+  const c = {
+    id: uid(),
+    name,
+    phone: document.getElementById('qaPhone')?.value||'',
+    email: document.getElementById('qaEmail')?.value||'',
+    discount: { type: document.getElementById('qaDType')?.value||'none', value: Number(document.getElementById('qaDVal')?.value||0) }
+  };
+  state.clients.push(c); save();
+  // Re-render clients dropdown and select the new one
+  renderJobs();
+  const jClient = document.getElementById('jClient');
+  if(jClient){ jClient.value = c.id; loadClientDiscount(); }
+  alert('Client added.');
+}
 
 // ------------ INIT -------------
 load();
