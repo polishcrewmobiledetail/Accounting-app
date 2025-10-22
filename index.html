@@ -1,0 +1,852 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Polish Crew — Accounting (PWA)</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#00A651"/>
+<style>
+:root{
+  --green:#00A651;--black:#000;--white:#fff;--muted:#1a1a1a;--muted-2:#0f0f10;
+  --text:#e8e8e8;--soft:#9aa0a6;--bad:#ff4d4d;--warn:#ffd166;--card:#101214;--card-2:#0c0e10;--border:#222428;
+  --shadow: 0 6px 18px rgba(0,0,0,.45);
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0;background:var(--black);color:var(--text);font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,"Open Sans","Helvetica Neue",Arial,sans-serif}
+a{color:var(--green)}
+.app{max-width:1200px;margin:0 auto;padding:16px 16px 64px;}
+.header{position:sticky;top:0;z-index:10;background:linear-gradient(180deg, rgba(0,0,0,.95) 10%, rgba(0,0,0,.75) 100%);backdrop-filter: blur(6px);border-bottom:1px solid var(--border)}
+.brand{display:flex;align-items:center;gap:12px;padding:12px 0}
+.logo{width:42px;height:42px;border-radius:10px;background: radial-gradient(100% 100% at 50% 0%, #0d2 0%, #0a4 100%);box-shadow:inset 0 0 10px rgba(0,0,0,.5), 0 0 18px rgba(0,166,81,.35);display:grid;place-items:center;border:1px solid rgba(255,255,255,.08)}
+.logo:before{content:"PC";font-weight:900;color:#fff;letter-spacing:.5px}
+.title h1{margin:0;font-weight:900;letter-spacing:.5px}
+.title small{display:block;color:var(--soft)}
+.green{color:var(--green)}
+.nav{display:flex;flex-wrap:wrap;gap:8px 8px;padding:8px 0 12px}
+.nav button{background:var(--card-2);border:1px solid var(--border);color:var(--text);padding:10px 14px;border-radius:12px;cursor:pointer;transition:.2s; box-shadow:var(--shadow)}
+.nav button.active,.nav button:hover{border-color:var(--green);box-shadow:0 0 0 1px var(--green) inset, 0 10px 22px rgba(0,166,81,.18)}
+.grid{display:grid;gap:16px}
+.cards{grid-template-columns:repeat(auto-fill,minmax(260px,1fr))}
+.card{background:linear-gradient(180deg,var(--card),var(--card-2));border:1px solid var(--border);border-radius:16px;padding:16px;box-shadow:var(--shadow)}
+.card h3{margin:0 0 8px}
+.row{display:flex;gap:12px;flex-wrap:wrap}
+.row > *{flex:1 1 220px}
+input,select,textarea{background:#0b0d0f;color:var(--text);border:1px solid var(--border);border-radius:12px;padding:10px 12px;outline:none;transition:.2s;width:100%}
+input:focus,select:focus,textarea:focus{border-color:var(--green);box-shadow:0 0 0 2px rgba(0,166,81,.25)}
+label{font-size:.9rem;color:#b8bfc7}
+.btn{background:var(--green);color:#021; border:none;border-radius:12px;padding:10px 14px;cursor:pointer;font-weight:700;letter-spacing:.2px;box-shadow:0 10px 22px rgba(0,166,81,.22)}
+.btn.ghost{background:transparent;color:var(--green);border:1px solid var(--green)}
+.btn.warn{background:var(--warn);color:#1a1400}
+.btn.bad{background:var(--bad);color:#fff}
+.btn.mono{background:#17191c;color:#d7dde3;border:1px solid var(--border)}
+.badge{display:inline-block;padding:4px 8px;border-radius:999px;border:1px solid var(--border);font-size:.8rem;color:#cfd2d6;margin-left:8px}
+.badge.ok{border-color:var(--green);color:var(--green)}
+.table{width:100%;border-collapse:collapse}
+.table th,.table td{border-bottom:1px solid var(--border);padding:10px 8px;text-align:left}
+.kpi{font-size:1.8rem;font-weight:900;letter-spacing:.3px}
+.kpi small{display:block;color:var(--soft);font-weight:600;font-size:.9rem}
+hr{border:none;border-top:1px solid var(--border);margin:12px 0}
+.small{font-size:.85rem;color:#aab0b6}
+.code{font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;background:#0b0d0f;border:1px solid var(--border);padding:8px;border-radius:8px}
+.footer{position:fixed;left:0;right:0;bottom:0;padding:8px;background:linear-gradient(180deg,rgba(0,0,0,0),rgba(0,0,0,.65) 40%);text-align:center;font-size:.85rem;color:#8f98a3}
+.section{display:none}
+.section.active{display:block}
+.quick{display:flex;gap:8px;flex-wrap:wrap}
+.helper{color:#9aa0a6;font-size:.9rem}
+.printable{background:#fff;color:#000;padding:16px;border-radius:12px}
+@media print {.no-print{display:none !important} .printable{box-shadow:none} body{background:#fff}}
+.sweep{position:absolute;inset:-40px -40px auto auto;width:240px;height:240px;filter: blur(40px);background: radial-gradient(60% 60% at 60% 40%, rgba(0,166,81,.6), transparent 60%);opacity:.35; pointer-events:none}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="header no-print">
+    <div class="brand">
+      <div class="logo"></div>
+      <div class="title">
+        <h1>POLISH <span class="green">CREW</span> — Accounting (PWA)</h1>
+        <small>Installable on phone • Offline • Dark/futuristic</small>
+      </div>
+    </div>
+    <div class="nav" id="nav"></div>
+  </div>
+
+  <div id="sections">
+    <section class="section active" id="Dashboard">
+      <div class="sweep"></div>
+      <div class="grid cards">
+        <div class="card">
+          <h3>Today</h3>
+          <div class="kpi" id="kpiToday">$0<span class="small"><small>Income</small></span></div>
+          <hr/>
+          <div class="row">
+            <div><label>Open Jobs</label><div class="kpi" id="kpiOpen">0</div></div>
+            <div><label>Unpaid</label><div class="kpi" id="kpiUnpaid">0</div></div>
+          </div>
+        </div>
+        <div class="card">
+          <h3>Month to Date</h3>
+          <div class="row">
+            <div><div class="kpi" id="kpiMTDIncome">$0<small>Income</small></div></div>
+            <div><div class="kpi" id="kpiMTDExpense">$0<small>Expenses</small></div></div>
+            <div><div class="kpi" id="kpiMTDNet">$0<small>Net</small></div></div>
+          </div>
+        </div>
+        <div class="card">
+          <h3>Quick Actions</h3>
+          <div class="quick">
+            <button class="btn" onclick="go('Jobs')">Start a Quote</button>
+            <button class="btn ghost" onclick="go('Expenses')">Add Expense</button>
+            <button class="btn ghost" onclick="go('Clients')">Add Client</button>
+            <button class="btn ghost" onclick="go('Export/Import')">Export Backup</button>
+          </div>
+          <p class="helper">Tip: Export JSON at end of day to your phone or cloud for backup.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="Jobs">
+      <div class="grid cards">
+        <div class="card">
+          <h3>Quote → Book → Work → Pay <span class="badge ok">Guided</span></h3>
+          <div id="jobForm"></div>
+        </div>
+        <div class="card">
+          <h3>Open Jobs</h3>
+          <div id="jobList"></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="Transactions">
+      <div class="grid cards">
+        <div class="card">
+          <h3>Transactions</h3>
+          <div class="row">
+            <input id="txSearch" placeholder="Search (client, type, method, note)" oninput="renderTransactions()"/>
+            <button class="btn ghost" onclick="exportCSV()">Export CSV</button>
+          </div>
+          <div id="txTable"></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="Clients">
+      <div class="grid cards">
+        <div class="card">
+          <h3>Add / Edit Client</h3>
+          <div id="clientForm"></div>
+        </div>
+        <div class="card">
+          <h3>Client List</h3>
+          <div id="clientList"></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="Menu Editor">
+      <div class="grid cards">
+        <div class="card">
+          <h3>Packages (by vehicle size)</h3>
+          <div id="menuPackages"></div>
+        </div>
+        <div class="card">
+          <h3>Add-ons</h3>
+          <div id="menuAddons"></div>
+        </div>
+        <div class="card">
+          <h3>Maintenance Program</h3>
+          <div id="menuMaint"></div>
+        </div>
+        <div class="card">
+          <h3>Actions</h3>
+          <button class="btn bad" onclick="resetMenu()">Reset to Official v9</button>
+          <span class="small">This will overwrite current prices with menu defaults.</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="Expenses">
+      <div class="grid cards">
+        <div class="card">
+          <h3>New Expense</h3>
+          <div id="expenseForm"></div>
+        </div>
+        <div class="card">
+          <h3>Expenses</h3>
+          <div class="row">
+            <input id="expSearch" placeholder="Search (category, vendor, method, note)" oninput="renderExpenses()"/>
+          </div>
+          <div id="expenseTable"></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="Mileage">
+      <div class="grid cards">
+        <div class="card">
+          <h3>Log Mileage</h3>
+          <div id="mileageForm"></div>
+        </div>
+        <div class="card">
+          <h3>Mileage Log</h3>
+          <div id="mileageTable"></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="Export/Import">
+      <div class="grid cards">
+        <div class="card">
+          <h3>Backup / Restore</h3>
+          <div class="row">
+            <button class="btn" onclick="exportJSON()">Export JSON</button>
+            <label class="btn ghost" for="importFile">Import JSON</label>
+            <input id="importFile" type="file" accept="application/json" style="display:none" onchange="importJSON(this.files[0])"/>
+          </div>
+          <p class="small">Export at end of day and save to your phone/Drive/iCloud.</p>
+          <hr/>
+          <h3>Print Quote / Receipt</h3>
+          <div id="printArea" class="printable">
+            <h2>POLISH CREW — Quote / Receipt</h2>
+            <div id="printContent">Choose a Job in Jobs → Quote to render.</div>
+          </div>
+          <div class="no-print" style="margin-top:8px">
+            <button class="btn" onclick="window.print()">Print / Save as PDF</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="Settings">
+      <div class="grid cards">
+        <div class="card">
+          <h3>Brand & App Settings</h3>
+          <div class="row">
+            <div>
+              <label>Business Name</label>
+              <input id="bizName" placeholder="Polish Crew Mobile Detailing" oninput="state.settings.bizName=this.value;save()"/>
+            </div>
+            <div>
+              <label>Phone</label>
+              <input id="bizPhone" placeholder="(XXX) XXX-XXXX" oninput="state.settings.bizPhone=this.value;save()"/>
+            </div>
+            <div>
+              <label>Email</label>
+              <input id="bizEmail" placeholder="book@polishcrew.example" oninput="state.settings.bizEmail=this.value;save()"/>
+            </div>
+            <div>
+              <label>Address / Service Area</label>
+              <input id="bizAddr" placeholder="Inland Empire, CA" oninput="state.settings.bizAddr=this.value;save()"/>
+            </div>
+          </div>
+          <p class="small">This info appears on printed quotes/receipts.</p>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <div class="footer no-print">POLISH CREW • We Bring the Shine • Mobile Auto Detailing at Your Door</div>
+</div>
+
+<script>
+// Register PWA service worker
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('./service-worker.js').catch(()=>{});
+  });
+}
+
+// ------------ STATE & DEFAULTS -------------
+const VEHICLE_SIZES = ["Coupe","Sedan","Crossover / Small SUV","Large SUV / Truck"];
+const JOB_STATUS = ["Quoted","Booked","In Progress","Complete","Paid"];
+
+const DEFAULT_MENU = {
+  packages: {
+    "Exterior Wash": {"Coupe":60,"Sedan":65,"Crossover / Small SUV":75,"Large SUV / Truck":85},
+    "Interior Refresh": {"Coupe":80,"Sedan":90,"Crossover / Small SUV":100,"Large SUV / Truck":110},
+    "Full Detail (Inside & Out)": {"Coupe":100,"Sedan":120,"Crossover / Small SUV":140,"Large SUV / Truck":160}
+  },
+  addons: [
+    {name:"Seat Spot Clean", priceRange:"25–40", base:25},
+    {name:"Clay Bar Decontamination", price:50},
+    {name:"Iron Remover Treatment", price:25},
+    {name:"Engine Bay Clean", price:50},
+    {name:"Odor Neutralizer", price:25},
+    {name:"Trim Restore", price:25}
+  ],
+  maintenance: {
+    weekly_biweekly: {"Coupe":50,"Sedan":55,"Crossover / Small SUV":65,"Large SUV / Truck":75},
+    monthly: {"Coupe":60,"Sedan":65,"Crossover / Small SUV":75,"Large SUV / Truck":85}
+  }
+};
+
+let state = {
+  clients: [], transactions: [], expenses: [], mileage: [], jobs: [],
+  menu: JSON.parse(JSON.stringify(DEFAULT_MENU)),
+  settings: {bizName:"Polish Crew", bizPhone:"", bizEmail:"", bizAddr:""}
+};
+
+function save(){ localStorage.setItem("pc_usb_state", JSON.stringify(state)); refreshKPIs(); }
+function load(){ const s = localStorage.getItem("pc_usb_state"); if(s){ try{ state = JSON.parse(s);}catch(e){ console.warn("parse fail", e);} } }
+function resetMenu(){ state.menu = JSON.parse(JSON.stringify(DEFAULT_MENU)); save(); renderMenuEditor(); }
+function uid(){return Math.random().toString(36).slice(2)+Date.now().toString(36)}
+
+// ------------ NAV / ROUTER -------------
+const tabs = ["Dashboard","Jobs","Transactions","Clients","Menu Editor","Expenses","Mileage","Export/Import","Settings"];
+const navEl = document.getElementById('nav');
+const sections = document.querySelectorAll('.section');
+function buildNav(){
+  navEl.innerHTML = "";
+  tabs.forEach(t => {
+    const btn = document.createElement('button');
+    btn.textContent = t;
+    btn.onclick = () => go(t);
+    if(t === "Dashboard") btn.classList.add('active');
+    navEl.appendChild(btn);
+  });
+}
+function go(tab){
+  sections.forEach(s => s.classList.remove('active'));
+  document.getElementById(tab).classList.add('active');
+  navEl.querySelectorAll('button').forEach(b => { if(b.textContent===tab) b.classList.add('active'); else b.classList.remove('active'); });
+  if(tab==="Jobs") renderJobs();
+  if(tab==="Transactions") renderTransactions();
+  if(tab==="Clients") renderClients();
+  if(tab==="Menu Editor") renderMenuEditor();
+  if(tab==="Expenses") renderExpenses();
+  if(tab==="Mileage") renderMileage();
+  if(tab==="Dashboard") refreshKPIs();
+}
+buildNav();
+
+// ------------ DASHBOARD KPI -------------
+function inMonth(t){ const d=new Date(t.date), now=new Date(); return d.getMonth()===now.getMonth() && d.getFullYear()===now.getFullYear(); }
+function refreshKPIs(){
+  const today = new Date().toISOString().slice(0,10);
+  const todayIncome = state.transactions.filter(t=>t.type==="income" && t.date.slice(0,10)===today).reduce((a,b)=>a+b.amount,0);
+  document.getElementById('kpiToday').textContent = currency(todayIncome);
+  const open = state.jobs.filter(j=>["Quoted","Booked","In Progress","Complete"].includes(j.status)).length;
+  const unpaid = state.jobs.filter(j=>j.status!=="Paid").length;
+  document.getElementById('kpiOpen').textContent = open;
+  document.getElementById('kpiUnpaid').textContent = unpaid;
+  const mIncome = state.transactions.filter(t=>t.type==="income").filter(inMonth).reduce((a,b)=>a+b.amount,0);
+  const mExpense = state.transactions.filter(t=>t.type==="expense").filter(inMonth).reduce((a,b)=>a+b.amount,0);
+  document.getElementById('kpiMTDIncome').textContent = currency(mIncome);
+  document.getElementById('kpiMTDExpense').textContent = currency(mExpense);
+  document.getElementById('kpiMTDNet').textContent = currency(mIncome - mExpense);
+}
+function currency(n){return "$"+(Number(n||0).toFixed(2))}
+
+// ------------ CLIENTS -------------
+function renderClients(){
+  const f = document.getElementById('clientForm');
+  f.innerHTML = `
+    <div class="row">
+      <div><label>Name</label><input id="cName" placeholder="Client name"></div>
+      <div><label>Phone</label><input id="cPhone" placeholder="(xxx) xxx-xxxx"></div>
+      <div><label>Email</label><input id="cEmail" placeholder="email@client.com"></div>
+    </div>
+    <div class="row">
+      <div>
+        <label>Default Discount Type</label>
+        <select id="cDType"><option value="none">None</option><option value="percent">% Percent</option><option value="flat">$ Flat</option></select>
+      </div>
+      <div><label>Default Discount Value</label><input id="cDVal" type="number" step="1" placeholder="e.g., 15"></div>
+      <div style="align-self:end"><button class="btn" onclick="saveClient()">Save Client</button></div>
+    </div>
+  `;
+  const list = document.getElementById('clientList');
+  if(state.clients.length===0){list.innerHTML="<p class='small'>No clients yet.</p>";return;}
+  let html = `<table class="table"><thead><tr><th>Name</th><th>Contact</th><th>Discount</th><th></th></tr></thead><tbody>`;
+  for(const c of state.clients){
+    const d = c.discount?.type && c.discount.type!=='none' ? (c.discount.type==='percent'?`${c.discount.value}%`:`$${c.discount.value}`) : "-";
+    html += `<tr><td>${esc(c.name)}</td><td class="small">${esc(c.phone||"")}<br>${esc(c.email||"")}</td><td>${d}</td>
+      <td><button class="btn mono" onclick="editClient('${c.id}')">Edit</button> <button class="btn bad" onclick="delClient('${c.id}')">Delete</button></td></tr>`;
+  }
+  html += `</tbody></table>`;
+  list.innerHTML = html;
+}
+function saveClient(){
+  const name = g('cName').value.trim(); if(!name) return alert("Name required");
+  const c = { id: uid(), name, phone: g('cPhone').value.trim(), email: g('cEmail').value.trim(), discount: {type: g('cDType').value, value: Number(g('cDVal').value||0)} };
+  state.clients.push(c); save(); renderClients();
+  g('cName').value=g('cPhone').value=g('cEmail').value=g('cDVal').value=""; g('cDType').value='none';
+}
+function editClient(id){
+  const c = state.clients.find(x=>x.id===id); if(!c) return;
+  g('cName').value=c.name||""; g('cPhone').value=c.phone||""; g('cEmail').value=c.email||"";
+  g('cDType').value=c.discount?.type||"none"; g('cDVal').value=c.discount?.value||0;
+  const oldSave = saveClient;
+  window.saveClient = function(){
+    c.name=g('cName').value.trim(); c.phone=g('cPhone').value.trim(); c.email=g('cEmail').value.trim();
+    c.discount={type:g('cDType').value, value:Number(g('cDVal').value||0)};
+    save(); renderClients(); window.saveClient = oldSave;
+    g('cName').value=g('cPhone').value=g('cEmail').value=g('cDVal').value=""; g('cDType').value='none';
+  }
+}
+function delClient(id){ if(!confirm("Delete this client?")) return; state.clients = state.clients.filter(c=>c.id!==id); save(); renderClients(); }
+
+// ------------ MENU EDITOR -------------
+function renderMenuEditor(){
+  const mp = document.getElementById('menuPackages');
+  let html = `<table class="table"><thead><tr><th>Service</th>${VEHICLE_SIZES.map(s=>`<th>${s}</th>`).join("")}</tr></thead><tbody>`;
+  for(const [svc, map] of Object.entries(state.menu.packages)){
+    html += `<tr><td>${esc(svc)}</td>`;
+    for(const size of VEHICLE_SIZES){
+      html += `<td><input type="number" value="${map[size]??0}" onchange="state.menu.packages[${JSON.stringify(svc)}][${JSON.stringify(size)}]=Number(this.value);save()"></td>`;
+    }
+    html += `</tr>`;
+  }
+  html += `</tbody></table>`;
+  mp.innerHTML = html;
+
+  const ma = document.getElementById('menuAddons');
+  let ahtml = `<table class="table"><thead><tr><th>Name</th><th>Price</th><th>Low–High</th></tr></thead><tbody>`;
+  state.menu.addons.forEach((a,i)=>{
+    ahtml += `<tr>
+      <td><input value="${esc(a.name)}" onchange="state.menu.addons[${i}].name=this.value;save()"></td>
+      <td><input type="number" value="${a.price??a.base??0}" onchange="(state.menu.addons[${i}].price=Number(this.value), delete state.menu.addons[${i}].base); save()"></td>
+      <td><input value="${esc(a.priceRange||'')}" placeholder="e.g., 25–40" onchange="state.menu.addons[${i}].priceRange=this.value;save()"></td>
+    </tr>`;
+  });
+  ahtml += `</tbody></table>`;
+  ma.innerHTML = ahtml;
+
+  const mm = document.getElementById('menuMaint');
+  let mhtml = `<h4>Weekly / Biweekly</h4><table class="table"><thead><tr>${VEHICLE_SIZES.map(s=>`<th>${s}</th>`).join("")}</tr></thead><tbody><tr>`;
+  for(const s of VEHICLE_SIZES){
+    mhtml += `<td><input type="number" value="${state.menu.maintenance.weekly_biweekly[s]??0}" onchange="state.menu.maintenance.weekly_biweekly[${JSON.stringify(s)}]=Number(this.value);save()"></td>`;
+  }
+  mhtml += `</tr></tbody></table>`;
+  mhtml += `<h4>Monthly (3–4 weeks)</h4><table class="table"><thead><tr>${VEHICLE_SIZES.map(s=>`<th>${s}</th>`).join("")}</tr></thead><tbody><tr>`;
+  for(const s of VEHICLE_SIZES){
+    mhtml += `<td><input type="number" value="${state.menu.maintenance.monthly[s]??0}" onchange="state.menu.maintenance.monthly[${JSON.stringify(s)}]=Number(this.value);save()"></td>`;
+  }
+  mhtml += `</tr></tbody></table>`;
+  mm.innerHTML = mhtml;
+}
+
+// ------------ JOBS (GUIDED) -------------
+function renderJobs(){
+  const jf = document.getElementById('jobForm');
+  const clients = state.clients.map(c=>`<option value="${c.id}">${esc(c.name)}</option>`).join("");
+  const pkgs = Object.keys(state.menu.packages).map(p=>`<option>${esc(p)}</option>`).join("");
+  jf.innerHTML = `
+    <div class="row">
+      <div><label>Client</label><select id="jClient"><option value="">Select...</option>${clients}</select><div id="quickAddClient" class="small" style="margin-top:6px"></div></div>
+      <div><label>Vehicle Size</label><select id="jSize">${VEHICLE_SIZES.map(s=>`<option>${s}</option>`)}</select></div>
+      <div><label>Package</label><select id="jPkg">${pkgs}</select></div>
+      <div><label>Date</label><input id="jDate" type="date" value="${today()}"></div>
+    </div>
+    <div class="row">
+      <div><label>Base Price</label><input id="jBase" type="number" placeholder="Auto from menu"></div>
+      <div><label>Discount Type</label><select id="jDType"><option value="none">None</option><option value="percent">% Percent</option><option value="flat">$ Flat</option></select></div>
+      <div><label>Discount Value</label><input id="jDVal" type="number" step="1" value="0"></div>
+      <div style="align-self:end" class="quick">
+        <button class="btn mono" onclick="quickDiscount('10%')">10%</button>
+        <button class="btn mono" onclick="quickDiscount('$10')">$10</button>
+        <button class="btn mono" onclick="quickDiscount('$20')">$20</button>
+        <button class="btn mono" onclick="quickDiscount('F&F')">F&F 15%</button>
+        <button class="btn mono" onclick="quickDiscount('20%')">20%</button>
+      </div>
+    </div>
+    <div><label>Add-ons (adjust price as needed)</label><div id="jAddons"></div></div>
+    <div class="row">
+      <div><label>Notes</label><textarea id="jNotes" rows="2" placeholder="Address, gate code, timing, etc."></textarea></div>
+    </div>
+    <div class="row">
+      <div><strong>Total:</strong> <span id="jTotal">$0.00</span></div>
+      <div class="quick">
+        <button class="btn" onclick="saveJob()">Save Job</button>
+        <button class="btn ghost" onclick="quotePrint()">Print / Save Quote</button>
+      </div>
+    </div>
+  `;
+  g('jPkg').onchange = autoBase;
+  g('jSize').onchange = autoBase;
+  g('jClient').onchange = loadClientDiscount;
+  autoBase(); buildJobAddons(); updateJobTotal();
+  quickAddClientUI();
+  listJobs();
+}
+function today(){return new Date().toISOString().slice(0,10)}
+function autoBase(){ const size = g('jSize').value; const pkg = g('jPkg').value; const v = state.menu.packages[pkg]?.[size] ?? 0; g('jBase').value = v; updateJobTotal(); }
+function loadClientDiscount(){
+  const id = g('jClient').value; const c = state.clients.find(x=>x.id===id);
+  if(!c || !c.discount) return;
+  const {type,value} = c.discount; g('jDType').value = type||'none'; g('jDVal').value = value||0; updateJobTotal();
+}
+function quickDiscount(kind){
+  if(kind==="F&F"){ g('jDType').value='percent'; g('jDVal').value=15; }
+  else if(kind.endsWith('%')){ g('jDType').value='percent'; g('jDVal').value=parseInt(kind) }
+  else { g('jDType').value='flat'; g('jDVal').value=parseInt(kind.replace(/\D/g,'')) }
+  updateJobTotal();
+}
+function buildJobAddons(){
+  const wrap = document.getElementById('jAddons'); wrap.innerHTML="";
+  state.menu.addons.forEach((a,i)=>{
+    const row = document.createElement('div'); row.className='row';
+    const price = (a.price ?? a.base ?? 0);
+    row.innerHTML = `
+      <div style="flex:0 0 28px; display:grid; place-items:center">
+        <input type="checkbox" id="ad_${i}" onchange="updateJobTotal()">
+      </div>
+      <div style="flex:1"><input value="${esc(a.name)}" disabled></div>
+      <div style="flex:0 0 160px"><input id="ap_${i}" type="number" value="${price}" onchange="updateJobTotal()"></div>
+    `;
+    wrap.appendChild(row);
+  });
+}
+function selectedAddons(){
+  const ads = [];
+  state.menu.addons.forEach((a,i)=>{
+    if(g('ad_'+i)?.checked){
+      ads.push({name:a.name, price: Number(g('ap_'+i).value||0)});
+    }
+  });
+  return ads;
+}
+function calcDiscount(subtotal, type, value){
+  if(type==='percent') return subtotal * (value/100);
+  if(type==='flat') return Math.min(subtotal, value);
+  return 0;
+}
+function updateJobTotal(){
+  const base = Number(g('jBase').value||0);
+  const addons = selectedAddons().reduce((a,b)=>a+b.price,0);
+  const sub = base + addons;
+  const d = calcDiscount(sub, g('jDType').value, Number(g('jDVal').value||0));
+  const total = Math.max(0, sub - d);
+  g('jTotal').textContent = currency(total);
+  return total;
+}
+function saveJob(){
+  const id = uid();
+  const clientId = g('jClient').value; if(!clientId) return alert("Select a client");
+  const job = {
+    id, date:g('jDate').value || today(),
+    clientId, vehicleSize:g('jSize').value, packageName:g('jPkg').value,
+    basePrice:Number(g('jBase').value||0),
+    addons:selectedAddons(),
+    discount:{type:g('jDType').value, value:Number(g('jDVal').value||0)},
+    status:"Quoted",
+    total: updateJobTotal(),
+    paid: 0,
+    notes:g('jNotes').value||""
+  };
+  state.jobs.push(job); save(); quickAddClientUI();
+  listJobs();
+  alert("Job saved as Quoted.");
+}
+function listJobs(){
+  const jl = document.getElementById('jobList');
+  if(state.jobs.length===0){jl.innerHTML="<p class='small'>No jobs yet.</p>"; return;}
+  let html = `<table class="table"><thead><tr><th>Date</th><th>Client</th><th>Pkg</th><th>Total</th><th>Status</th><th></th></tr></thead><tbody>`;
+  for(const j of state.jobs){
+    const c = state.clients.find(x=>x.id===j.clientId);
+    html += `<tr>
+      <td>${esc(j.date)}</td>
+      <td>${esc(c?c.name:'(deleted)')}</td>
+      <td class="small">${esc(j.packageName)}<br><span class="small">${esc(j.vehicleSize)}</span></td>
+      <td>${currency(j.total)}</td>
+      <td>
+        <select onchange="setJobStatus('${j.id}', this.value)">
+          ${JOB_STATUS.map(s=>`<option ${j.status===s?'selected':''}>${s}</option>`).join("")}
+        </select>
+      </td>
+      <td>
+        <button class="btn mono" onclick="jobQuote('${j.id}')">Quote</button>
+        ${j.status!=='Paid'? `<button class="btn" onclick="takePayment('${j.id}')">Take Payment</button>`:""}
+        <button class="btn ghost" onclick="editJob('${j.id}')">Edit</button>
+        <button class="btn bad" onclick="deleteJob('${j.id}')">Delete</button>
+      </td>
+    </tr>`;
+  }
+  html += `</tbody></table>`;
+  jl.innerHTML = html;
+}
+function setJobStatus(id, status){ const j = state.jobs.find(x=>x.id===id); if(!j) return; j.status = status; save(); quickAddClientUI();
+  listJobs(); }
+function jobQuote(id){
+  const j = state.jobs.find(x=>x.id===id); if(!j) return;
+  const c = state.clients.find(x=>x.id===j.clientId)||{};
+  const items = [{name:j.packageName+" — "+j.vehicleSize, price:j.basePrice}, ...j.addons];
+  const sub = items.reduce((a,b)=>a+b.price,0);
+  const d = calcDiscount(sub,j.discount?.type,j.discount?.value||0);
+  const tot = Math.max(0,sub-d);
+  const biz = state.settings;
+  g('printContent').innerHTML = `
+    <div class="row" style="gap:24px">
+      <div style="flex:1">
+        <strong>${esc(biz.bizName||'Polish Crew')}</strong><br>
+        ${esc(biz.bizPhone||'')}${biz.bizPhone&&biz.bizEmail?' • ':''}${esc(biz.bizEmail||'')}<br>
+        ${esc(biz.bizAddr||'')}
+      </div>
+      <div style="text-align:right">
+        <strong>Date:</strong> ${esc(j.date)}<br>
+        <strong>Job ID:</strong> ${esc(j.id.slice(-6).toUpperCase())}<br>
+        <strong>Status:</strong> ${esc(j.status)}
+      </div>
+    </div>
+    <hr>
+    <strong>Client</strong><br>
+    ${esc(c.name||'')}<br>
+    ${esc(c.phone||'')} ${c.phone&&c.email?'•':''} ${esc(c.email||'')}
+    <hr>
+    <table style="width:100%; border-collapse:collapse" border="1" cellpadding="6">
+      <thead><tr><th align="left">Item</th><th align="right">Price</th></tr></thead>
+      <tbody>
+        ${items.map(it=>`<tr><td>${esc(it.name)}</td><td align="right">${currency(it.price)}</td></tr>`).join("")}
+        <tr><td align="right"><em>Discount</em></td><td align="right">-${currency(d)}</td></tr>
+        <tr><td align="right"><strong>Total</strong></td><td align="right"><strong>${currency(tot)}</strong></td></tr>
+      </tbody>
+    </table>
+    <p class="small">Thank you for choosing POLISH CREW — We Bring the Shine.</p>
+  `;
+  go("Export/Import");
+}
+function quotePrint(){ alert("Pick the job in the Open Jobs list and click ‘Quote’ to render the printable view, then Print / Save as PDF."); }
+function takePayment(id){
+  const j = state.jobs.find(x=>x.id===id); if(!j) return;
+  const method = prompt("Payment method (Cash, Card, Zelle, Venmo, etc.):","Cash"); if(method===null) return;
+  const amountStr = prompt(`Amount received (Total ${currency(j.total)}):`, j.total);
+  if(amountStr===null) return;
+  const amount = Number(amountStr||0);
+  if(!(amount>0)) return alert("Invalid amount");
+  j.paid += amount;
+  if(j.paid >= j.total){ j.status="Paid"; }
+  const tx = {
+    id: uid(), date: new Date().toISOString(), type:"income", amount,
+    method, clientId: j.clientId, note:`${j.packageName} ${j.vehicleSize} (Job ${j.id.slice(-6).toUpperCase()})`,
+    items: [{name:j.packageName, price:j.basePrice}, ...j.addons], discount: j.discount
+  };
+  state.transactions.push(tx); save(); quickAddClientUI();
+  listJobs(); renderTransactions(); refreshKPIs();
+  alert(`${currency(amount)} recorded via ${method}. ${j.status==='Paid'?'Job marked Paid.':''}`);
+}
+function deleteJob(id){ if(!confirm("Delete this job?")) return; state.jobs = state.jobs.filter(j=>j.id!==id); save(); quickAddClientUI();
+  listJobs(); }
+function editJob(id){
+  const j = state.jobs.find(x=>x.id===id); if(!j) return;
+  go("Jobs");
+  g('jClient').value = j.clientId;
+  g('jSize').value = j.vehicleSize;
+  g('jPkg').value = j.packageName;
+  g('jDate').value = j.date;
+  g('jBase').value = j.basePrice;
+  g('jDType').value = j.discount?.type||'none';
+  g('jDVal').value = j.discount?.value||0;
+  buildJobAddons();
+  state.menu.addons.forEach((a,i)=>{
+    const found = j.addons.find(k=>k.name===a.name);
+    if(found){ g('ad_'+i).checked = true; g('ap_'+i).value = found.price; }
+  });
+  g('jNotes').value = j.notes||"";
+  updateJobTotal();
+  const old = saveJob;
+  window.saveJob = function(){
+    j.clientId = g('jClient').value;
+    j.vehicleSize = g('jSize').value;
+    j.packageName = g('jPkg').value;
+    j.date = g('jDate').value;
+    j.basePrice = Number(g('jBase').value||0);
+    j.discount = {type:g('jDType').value, value:Number(g('jDVal').value||0)};
+    j.addons = selectedAddons();
+    j.total = updateJobTotal();
+    j.notes = g('jNotes').value||"";
+    save(); quickAddClientUI();
+  listJobs(); alert("Job updated."); window.saveJob = old;
+  }
+}
+
+// ------------ TRANSACTIONS / EXPENSES / MILEAGE (same as v5) ------------
+function renderTransactions(){
+  const q = (g('txSearch')?.value||"").toLowerCase();
+  let rows = state.transactions.slice().reverse();
+  if(q){
+    rows = rows.filter(t=>{
+      const c = state.clients.find(x=>x.id===t.clientId);
+      return [t.type,t.method,t.note,(c?c.name:"")].join(" ").toLowerCase().includes(q);
+    });
+  }
+  let html = `<table class="table"><thead><tr><th>Date</th><th>Type</th><th>Amount</th><th>Method</th><th>Client</th><th>Note</th></tr></thead><tbody>`;
+  for(const t of rows){
+    const c = state.clients.find(x=>x.id===t.clientId);
+    html += `<tr>
+      <td>${esc(new Date(t.date).toLocaleString())}</td>
+      <td>${esc(t.type)}</td>
+      <td>${currency(t.amount)}</td>
+      <td>${esc(t.method||"")}</td>
+      <td>${esc(c?c.name:"")}</td>
+      <td class="small">${esc(t.note||"")}</td>
+    </tr>`;
+  }
+  html += `</tbody></table>`;
+  g('txTable').innerHTML = html;
+}
+function exportCSV(){
+  const headers = ["date","type","amount","method","client","note"];
+  const lines = [headers.join(",")];
+  for(const t of state.transactions){
+    const c = state.clients.find(x=>x.id===t.clientId);
+    const row = [ new Date(t.date).toISOString(), t.type, t.amount, t.method||"", c?c.name:"", (t.note||"").replace(/,/g,";") ];
+    lines.push(row.join(","));
+  }
+  const blob = new Blob([lines.join("\n")], {type:"text/csv"});
+  download(blob, "polishcrew_transactions.csv");
+}
+
+function renderExpenses(){
+  const ef = document.getElementById('expenseForm');
+  ef.innerHTML = `
+    <div class="row">
+      <div><label>Date</label><input id="exDate" type="date" value="${today()}"></div>
+      <div><label>Category</label><select id="exCat">
+        <option>Fuel</option><option>Supplies</option><option>Tools</option><option>Marketing</option><option>Insurance</option><option>Other</option>
+      </select></div>
+      <div><label>Vendor</label><input id="exVendor" placeholder="Costco, Chemical Guys, etc."></div>
+    </div>
+    <div class="row">
+      <div><label>Amount</label><input id="exAmt" type="number" step="0.01" placeholder="0.00"></div>
+      <div><label>Payment Method</label><input id="exMethod" placeholder="Card / Cash / Bank"></div>
+      <div><label>Notes</label><input id="exNote" placeholder="e.g., towels, APC gallon"></div>
+      <div style="align-self:end"><button class="btn" onclick="saveExpense()">Save Expense</button></div>
+    </div>
+  `;
+  renderExpenseTable();
+}
+function saveExpense(){
+  const ex = {
+    id: uid(), date: new Date(g('exDate').value||today()).toISOString(),
+    category: g('exCat').value, vendor: g('exVendor').value.trim(),
+    amount: Number(g('exAmt').value||0), method: g('exMethod').value||"", note: g('exNote').value||""
+  };
+  state.expenses.push(ex);
+  state.transactions.push({id: uid(), date: ex.date, type:"expense", amount:ex.amount, method: ex.method, clientId:null, note:`${ex.category} — ${ex.vendor}: ${ex.note}`});
+  save(); renderExpenseTable(); renderTransactions(); refreshKPIs();
+  alert("Expense saved.");
+  g('exVendor').value=g('exAmt').value=g('exMethod').value=g('exNote').value="";
+}
+function renderExpenseTable(){
+  const q = (g('expSearch')?.value||"").toLowerCase();
+  let rows = state.expenses.slice().reverse();
+  if(q){ rows = rows.filter(e=>[e.category,e.vendor,e.method,e.note].join(" ").toLowerCase().includes(q)); }
+  let html = `<table class="table"><thead><tr><th>Date</th><th>Category</th><th>Vendor</th><th>Amount</th><th>Method</th><th>Note</th></tr></thead><tbody>`;
+  for(const e of rows){
+    html += `<tr>
+      <td>${esc(new Date(e.date).toLocaleDateString())}</td>
+      <td>${esc(e.category)}</td>
+      <td>${esc(e.vendor)}</td>
+      <td>${currency(e.amount)}</td>
+      <td>${esc(e.method)}</td>
+      <td class="small">${esc(e.note)}</td>
+    </tr>`;
+  }
+  html += `</tbody></table>`;
+  g('expenseTable').innerHTML = html;
+}
+
+function renderMileage(){
+  const mf = document.getElementById('mileageForm');
+  mf.innerHTML = `
+    <div class="row">
+      <div><label>Date</label><input id="miDate" type="date" value="${today()}"></div>
+      <div><label>Miles</label><input id="miMiles" type="number" step="0.1" placeholder="0.0"></div>
+      <div><label>Purpose</label><input id="miPurpose" placeholder="Client visit, supply run"></div>
+      <div style="align-self:end"><button class="btn" onclick="saveMileage()">Save</button></div>
+    </div>
+  `;
+  renderMileageTable();
+}
+function saveMileage(){ state.mileage.push({id:uid(), date:new Date(g('miDate').value||today()).toISOString(), miles:Number(g('miMiles').value||0), purpose:g('miPurpose').value||""}); save(); renderMileageTable(); alert("Mileage saved."); g('miMiles').value=g('miPurpose').value=""; }
+function renderMileageTable(){
+  let rows = state.mileage.slice().reverse();
+  let html = `<table class="table"><thead><tr><th>Date</th><th>Miles</th><th>Purpose</th></tr></thead><tbody>`;
+  for(const m of rows){ html += `<tr><td>${esc(new Date(m.date).toLocaleDateString())}</td><td>${m.miles}</td><td class="small">${esc(m.purpose)}</td></tr>`; }
+  html += `</tbody></table>`;
+  g('mileageTable').innerHTML = html;
+}
+
+// ------------ EXPORT / IMPORT -------------
+function exportJSON(){ const blob = new Blob([JSON.stringify(state,null,2)], {type:"application/json"}); download(blob, "polishcrew_backup.json"); }
+function importJSON(file){
+  const reader = new FileReader();
+  reader.onload = () => {
+    try{
+      const data = JSON.parse(reader.result);
+      if(!data || !data.menu || !data.transactions) throw new Error("Invalid backup");
+      state = data; save();
+      alert("Imported successfully.");
+      const active = document.querySelector('.section.active')?.id || "Dashboard";
+      go(active);
+    }catch(e){ alert("Import failed: "+e.message); }
+  };
+  reader.readAsText(file);
+}
+function download(blob, filename){ const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = filename; a.click(); setTimeout(()=>URL.revokeObjectURL(a.href), 1000); }
+
+// ------------ HELPERS -------------
+function g(id){return document.getElementById(id)}
+function esc(s){return (s==null?"":String(s)).replace(/[&<>"']/g, m=>({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;" }[m]))}
+
+
+// --- Quick Add Client (inline on Jobs) ---
+function quickAddClientUI(){
+  const target = document.getElementById('quickAddClient');
+  if(!target) return;
+  target.innerHTML = `
+    <details>
+      <summary class="small">+ Quick add client</summary>
+      <div class="row" style="margin-top:8px">
+        <div><label>Name</label><input id="qaName" placeholder="Client name"></div>
+        <div><label>Phone</label><input id="qaPhone" placeholder="(xxx) xxx-xxxx"></div>
+        <div><label>Email</label><input id="qaEmail" placeholder="email@client.com"></div>
+      </div>
+      <div class="row">
+        <div>
+          <label>Default Discount Type</label>
+          <select id="qaDType"><option value="none">None</option><option value="percent">% Percent</option><option value="flat">$ Flat</option></select>
+        </div>
+        <div><label>Default Discount Value</label><input id="qaDVal" type="number" step="1" placeholder="e.g., 15"></div>
+        <div style="align-self:end"><button class="btn" onclick="quickSaveClient()">Save & Select</button></div>
+      </div>
+    </details>
+  `;
+}
+function quickSaveClient(){
+  const name = (document.getElementById('qaName')?.value||'').trim();
+  if(!name){ alert('Name required'); return; }
+  const c = {
+    id: uid(),
+    name,
+    phone: document.getElementById('qaPhone')?.value||'',
+    email: document.getElementById('qaEmail')?.value||'',
+    discount: { type: document.getElementById('qaDType')?.value||'none', value: Number(document.getElementById('qaDVal')?.value||0) }
+  };
+  state.clients.push(c); save();
+  // Re-render clients dropdown and select the new one
+  renderJobs();
+  const jClient = document.getElementById('jClient');
+  if(jClient){ jClient.value = c.id; loadClientDiscount(); }
+  alert('Client added.');
+}
+
+// ------------ INIT -------------
+load();
+buildNav();
+renderJobs();
+renderTransactions();
+renderClients();
+renderMenuEditor();
+renderExpenses();
+renderMileage();
+refreshKPIs();
+g('bizName').value = state.settings.bizName||"";
+g('bizPhone').value = state.settings.bizPhone||"";
+g('bizEmail').value = state.settings.bizEmail||"";
+g('bizAddr').value = state.settings.bizAddr||"";
+</script>
+</body>
+</html>
