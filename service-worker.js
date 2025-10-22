@@ -1,4 +1,4 @@
-const CACHE_NAME = 'polishcrew-cache-v3';
+const CACHE_NAME = 'polishcrew-cache-v4';
 const ASSETS = [
   './',
   './index.html',
