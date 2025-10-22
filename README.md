@@ -1,10 +1,14 @@
-# Polish Crew — Accounting (PWA), Option A Navigation
+# Polish Crew — Accounting (PWA), Layer-Down Nav
 
-Two-layer navigation:
-- **Primary:** Dashboard, Jobs, Clients, Transactions, Expenses
-- **Secondary:** Menu Editor, Mileage, Export/Import, Settings
+Primary tabs visible in header: **Dashboard, Jobs, Clients**.  
+Secondary items live in a slide-out **More…** drawer, grouped as:
 
-Quick Add Client on the Jobs page, dark theme, offline-capable.
+- **Operations**: Menu Editor  
+- **Records**: Mileage, Transactions, Expenses  
+- **Data**: Export / Import  
+- **App**: Settings  
+
+Quick Add Client on Jobs, dark theme, offline-capable.
 
 ## Deploy (GitHub Pages)
 1. Upload all files in this folder to your repo **root**.

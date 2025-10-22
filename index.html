@@ -16,18 +16,18 @@
 html,body{margin:0;padding:0;background:var(--black);color:var(--text);font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,"Open Sans","Helvetica Neue",Arial,sans-serif}
 a{color:var(--green)}
 .app{max-width:1200px;margin:0 auto;padding:16px 16px 64px;}
-.header{position:sticky;top:0;z-index:10;background:linear-gradient(180deg, rgba(0,0,0,.95) 10%, rgba(0,0,0,.75) 100%);backdrop-filter: blur(6px);border-bottom:1px solid var(--border)}
+.header{position:sticky;top:0;z-index:20;background:linear-gradient(180deg, rgba(0,0,0,.95) 10%, rgba(0,0,0,.75) 100%);backdrop-filter: blur(6px);border-bottom:1px solid var(--border)}
 .brand{display:flex;align-items:center;gap:12px;padding:12px 0}
 .logo{width:42px;height:42px;border-radius:10px;background: radial-gradient(100% 100% at 50% 0%, #0d2 0%, #0a4 100%);box-shadow:inset 0 0 10px rgba(0,0,0,.5), 0 0 18px rgba(0,166,81,.35);display:grid;place-items:center;border:1px solid rgba(255,255,255,.08)}
 .logo:before{content:"PC";font-weight:900;color:#fff;letter-spacing:.5px}
 .title h1{margin:0;font-weight:900;letter-spacing:.5px}
 .title small{display:block;color:var(--soft)}
 .green{color:var(--green)}
-.nav{display:flex;flex-wrap:wrap;gap:8px 8px;padding:8px 0 8px}
+.nav{display:flex;gap:8px;padding:8px 0 8px;align-items:center}
 .nav button{background:var(--card-2);border:1px solid var(--border);color:var(--text);padding:10px 14px;border-radius:12px;cursor:pointer;transition:.2s; box-shadow:var(--shadow)}
 .nav button.active,.nav button:hover{border-color:var(--green);box-shadow:0 0 0 1px var(--green) inset, 0 10px 22px rgba(0,166,81,.18)}
-.nav.secondary{border-top:1px dashed var(--border);padding-top:10px;opacity:.92}
-.nav.secondary button{background:#0b0d0f;color:#cfd2d6}
+.nav .spacer{flex:1}
+.btn.more{background:#0b0d0f;color:#cfd2d6;border:1px solid var(--border)}
 .grid{display:grid;gap:16px}
 .cards{grid-template-columns:repeat(auto-fill,minmax(260px,1fr))}
 .card{background:linear-gradient(180deg,var(--card),var(--card-2));border:1px solid var(--border);border-radius:16px;padding:16px;box-shadow:var(--shadow)}
@@ -58,6 +58,17 @@ hr{border:none;border-top:1px solid var(--border);margin:12px 0}
 .printable{background:#fff;color:#000;padding:16px;border-radius:12px}
 @media print {.no-print{display:none !important} .printable{box-shadow:none} body{background:#fff}}
 .sweep{position:absolute;inset:-40px -40px auto auto;width:240px;height:240px;filter: blur(40px);background: radial-gradient(60% 60% at 60% 40%, rgba(0,166,81,.6), transparent 60%);opacity:.35; pointer-events:none}
+
+/* Slide-out panel */
+.drawer{position:fixed;inset:0;z-index:30;display:none}
+.drawer.open{display:block}
+.drawer .backdrop{position:absolute;inset:0;background:rgba(0,0,0,.5)}
+.panel{position:absolute;right:0;top:0;bottom:0;width:340px;max-width:86vw;background:#0b0d0f;border-left:1px solid var(--border);box-shadow: -12px 0 32px rgba(0,0,0,.5);padding:16px;overflow:auto}
+.panel h3{margin-top:0}
+.group{margin-bottom:16px;border:1px solid var(--border);border-radius:12px;padding:12px;background:#0d0f12}
+.group h4{margin:0 0 8px;color:#cfd2d6}
+.group button{width:100%;text-align:left;margin:4px 0}
+.closeX{position:absolute;right:12px;top:10px;background:transparent;border:1px solid var(--border);color:#cfd2d6;border-radius:8px;padding:6px 10px;cursor:pointer}
 </style>
 </head>
 <body>
@@ -71,10 +82,39 @@ hr{border:none;border-top:1px solid var(--border);margin:12px 0}
       </div>
     </div>
 
-    <!-- Primary nav -->
+    <!-- Primary nav only -->
     <div class="nav" id="navPrimary"></div>
-    <!-- Secondary nav -->
-    <div class="nav secondary" id="navSecondary"></div>
+  </div>
+
+  <!-- Hidden secondary nav in a slide-out drawer -->
+  <div class="drawer" id="moreDrawer" aria-hidden="true">
+    <div class="backdrop" onclick="toggleDrawer(false)"></div>
+    <div class="panel">
+      <button class="closeX" onclick="toggleDrawer(false)">Close ✕</button>
+      <h3>More</h3>
+
+      <div class="group">
+        <h4>Operations</h4>
+        <button class="btn mono" onclick="go('Menu Editor');toggleDrawer(false)">Menu Editor</button>
+      </div>
+
+      <div class="group">
+        <h4>Records</h4>
+        <button class="btn mono" onclick="go('Mileage');toggleDrawer(false)">Mileage</button>
+        <button class="btn mono" onclick="go('Transactions');toggleDrawer(false)">Transactions</button>
+        <button class="btn mono" onclick="go('Expenses');toggleDrawer(false)">Expenses</button>
+      </div>
+
+      <div class="group">
+        <h4>Data</h4>
+        <button class="btn mono" onclick="go('Export/Import');toggleDrawer(false)">Export / Import</button>
+      </div>
+
+      <div class="group">
+        <h4>App</h4>
+        <button class="btn mono" onclick="go('Settings');toggleDrawer(false)">Settings</button>
+      </div>
+    </div>
   </div>
 
   <div id="sections">
@@ -105,9 +145,9 @@ hr{border:none;border-top:1px solid var(--border);margin:12px 0}
             <button class="btn" onclick="go('Jobs')">Start a Quote</button>
             <button class="btn ghost" onclick="go('Expenses')">Add Expense</button>
             <button class="btn ghost" onclick="go('Clients')">Add Client</button>
-            <button class="btn ghost" onclick="go('Export/Import')">Export Backup</button>
+            <button class="btn ghost" onclick="toggleDrawer(true)">More…</button>
           </div>
-          <p class="helper">Tip: Export JSON at end of day to your phone/USB/Drive.</p>
+          <p class="helper">Tip: Export JSON at end of day to keep a backup.</p>
         </div>
       </div>
     </section>
@@ -308,31 +348,37 @@ function resetMenu(){ state.menu = JSON.parse(JSON.stringify(DEFAULT_MENU)); sav
 function uid(){return Math.random().toString(36).slice(2)+Date.now().toString(36)}
 
 // ------------ NAV / ROUTER -------------
-const primaryTabs = ["Dashboard","Jobs","Clients","Transactions","Expenses"];
-const secondaryTabs = ["Menu Editor","Mileage","Export/Import","Settings"];
+const primaryTabs = ["Dashboard","Jobs","Clients"]; // Keep top ultra-clean; rest in drawer
 const navPrimary = document.getElementById('navPrimary');
-const navSecondary = document.getElementById('navSecondary');
 const sections = document.querySelectorAll('.section');
 
-function buildNavRow(container, tabs){
-  container.innerHTML = "";
-  tabs.forEach(t => {
+function buildNavPrimary(){
+  navPrimary.innerHTML = "";
+  primaryTabs.forEach(t => {
     const btn = document.createElement('button');
     btn.textContent = t;
     btn.onclick = () => go(t);
     if(t === "Dashboard") btn.classList.add('active');
-    container.appendChild(btn);
+    navPrimary.appendChild(btn);
   });
+  const spacer = document.createElement('div'); spacer.className='spacer'; navPrimary.appendChild(spacer);
+  const more = document.createElement('button'); more.className='btn more'; more.textContent="More…"; more.onclick=()=>toggleDrawer(true); navPrimary.appendChild(more);
+}
+buildNavPrimary();
+
+function toggleDrawer(open){
+  const d = document.getElementById('moreDrawer');
+  if(open){ d.classList.add('open'); d.setAttribute('aria-hidden','false'); }
+  else { d.classList.remove('open'); d.setAttribute('aria-hidden','true'); }
 }
 
 function go(tab){
   sections.forEach(s => s.classList.remove('active'));
   document.getElementById(tab).classList.add('active');
 
-  [navPrimary, navSecondary].forEach(nav => {
-    nav.querySelectorAll('button').forEach(b => {
-      if(b.textContent===tab) b.classList.add('active'); else b.classList.remove('active');
-    });
+  // highlight in primary if applicable
+  navPrimary.querySelectorAll('button').forEach(b => {
+    if(b.textContent===tab) b.classList.add('active'); else b.classList.remove('active');
   });
 
   if(tab==="Jobs") renderJobs();
@@ -343,9 +389,6 @@ function go(tab){
   if(tab==="Mileage") renderMileage();
   if(tab==="Dashboard") refreshKPIs();
 }
-
-buildNavRow(navPrimary, primaryTabs);
-buildNavRow(navSecondary, secondaryTabs);
 
 // ------------ DASHBOARD KPI -------------
 function inMonth(t){ const d=new Date(t.date), now=new Date(); return d.getMonth()===now.getMonth() && d.getFullYear()===now.getFullYear(); }
@@ -421,7 +464,7 @@ function renderMenuEditor(){
   for(const [svc, map] of Object.entries(state.menu.packages)){
     html += `<tr><td>${esc(svc)}</td>`;
     for(const size of VEHICLE_SIZES){
-      html += `<td><input type="number" value="${map[size]??0}" onchange="state.menu.packages[${JSON.stringify(svc)}][${JSON.stringify(size)}]=Number(this.value);save()"></td>`;
+      html += `<td><input type="number" value="${map[size]??0}" onchange="state.menu.packages[${jsonStr(svc)}][${jsonStr(size)}]=Number(this.value);save()"></td>`;
     }
     html += `</tr>`;
   }
@@ -429,7 +472,7 @@ function renderMenuEditor(){
   mp.innerHTML = html;
 
   const ma = document.getElementById('menuAddons');
-  let ahtml = `<table class="table"><thead><tr><th>Name</th><th>Price</</th><th>Low–High</th></tr></thead><tbody>`;
+  let ahtml = `<table class="table"><thead><tr><th>Name</th><th>Price</th><th>Low–High</th></tr></thead><tbody>`;
   state.menu.addons.forEach((a,i)=>{
     ahtml += `<tr>
       <td><input value="${esc(a.name)}" onchange="state.menu.addons[${i}].name=this.value;save()"></td>
@@ -443,12 +486,12 @@ function renderMenuEditor(){
   const mm = document.getElementById('menuMaint');
   let mhtml = `<h4>Weekly / Biweekly</h4><table class="table"><thead><tr>${VEHICLE_SIZES.map(s=>`<th>${s}</th>`).join("")}</tr></thead><tbody><tr>`;
   for(const s of VEHICLE_SIZES){
-    mhtml += `<td><input type="number" value="${state.menu.maintenance.weekly_biweekly[s]??0}" onchange="state.menu.maintenance.weekly_biweekly[${JSON.stringify(s)}]=Number(this.value);save()"></td>`;
+    mhtml += `<td><input type="number" value="${state.menu.maintenance.weekly_biweekly[s]??0}" onchange="state.menu.maintenance.weekly_biweekly[${jsonStr(s)}]=Number(this.value);save()"></td>`;
   }
   mhtml += `</tr></tbody></table>`;
   mhtml += `<h4>Monthly (3–4 weeks)</h4><table class="table"><thead><tr>${VEHICLE_SIZES.map(s=>`<th>${s}</th>`).join("")}</tr></thead><tbody><tr>`;
   for(const s of VEHICLE_SIZES){
-    mhtml += `<td><input type="number" value="${state.menu.maintenance.monthly[s]??0}" onchange="state.menu.maintenance.monthly[${JSON.stringify(s)}]=Number(this.value);save()"></td>`;
+    mhtml += `<td><input type="number" value="${state.menu.maintenance.monthly[s]??0}" onchange="state.menu.maintenance.monthly[${jsonStr(s)}]=Number(this.value);save()"></td>`;
   }
   mhtml += `</tr></tbody></table>`;
   mm.innerHTML = mhtml;
@@ -578,7 +621,7 @@ function listJobs(){
       <td>${currency(j.total)}</td>
       <td>
         <select onchange="setJobStatus('${j.id}', this.value)">
-          ${JOB_STATUS.map(s=>`<option ${j.status===s?'selected':''}>${s}</option>`).join("")}
+          ${["Quoted","Booked","In Progress","Complete","Paid"].map(s=>`<option ${j.status===s?'selected':''}>${s}</option>`).join("")}
         </select>
       </td>
       <td>
@@ -716,14 +759,16 @@ function quickSaveClient(){
     discount: { type: document.getElementById('qaDType')?.value||'none', value: Number(document.getElementById('qaDVal')?.value||0) }
   };
   state.clients.push(c); save();
-  // Re-render clients dropdown and select the new one
-  renderJobs();
+  renderJobs(); // rebuild form to include new client
   const jClient = document.getElementById('jClient');
   if(jClient){ jClient.value = c.id; loadClientDiscount(); }
   alert('Client added.');
 }
 
-// ------------ TRANSACTIONS / EXPENSES / MILEAGE / EXPORT (same as before) ------------
+// Helpers used inside template strings
+function jsonStr(s){ return JSON.stringify(s); }
+
+// ------------ TRANSACTIONS / EXPENSES / MILEAGE / EXPORT (same) ------------
 function renderTransactions(){
   const q = (g('txSearch')?.value||"").toLowerCase();
   let rows = state.transactions.slice().reverse();
