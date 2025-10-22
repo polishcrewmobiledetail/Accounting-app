@@ -1,443 +1,460 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Polish Crew — Accounting (PWA)</title>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
 <link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#00A651"/>
+<meta name="theme-color" content="#00A651">
+<title>Polish Crew — Accounting</title>
 <style>
-:root{--green:#00A651;--black:#000;--white:#fff;--muted:#1a1a1a;--muted-2:#0f0f10;--text:#e8e8e8;--soft:#9aa0a6;--bad:#ff4d4d;--warn:#ffd166;--card:#101214;--card-2:#0c0e10;--border:#222428;--shadow:0 6px 18px rgba(0,0,0,.45)}
-*{box-sizing:border-box}
-html,body{margin:0;padding:0;background:var(--black);color:var(--text);font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,"Open Sans","Helvetica Neue",Arial,sans-serif}
-a{color:var(--green)}
-.app{max-width:1200px;margin:0 auto;padding:16px 16px 64px;}
-.header{position:sticky;top:0;z-index:20;background:linear-gradient(180deg, rgba(0,0,0,.95) 10%, rgba(0,0,0,.75) 100%);backdrop-filter: blur(6px);border-bottom:1px solid var(--border)}
-.brand{display:flex;align-items:center;gap:12px;padding:12px 0}
-.brand img{height:44px;width:auto;border-radius:10px;box-shadow:0 0 18px rgba(0,166,81,.22);background:#000}
-.title{display:flex;flex-direction:column}
-.title h1{margin:0;font-weight:900;letter-spacing:.5px}
-.title small{display:block;color:var(--soft)}
-.green{color:var(--green)}
-.nav{display:flex;gap:8px;padding:8px 0 8px;align-items:center}
-.nav button{background:var(--card-2);border:1px solid var(--border);color:var(--text);padding:10px 14px;border-radius:12px;cursor:pointer;transition:.2s; box-shadow:var(--shadow)}
-.nav button.active,.nav button:hover{border-color:var(--green);box-shadow:0 0 0 1px var(--green) inset, 0 10px 22px rgba(0,166,81,.18)}
-.nav .spacer{flex:1}
-.btn.more{background:#0b0d0f;color:#cfd2d6;border:1px solid var(--border)}
-.iconbtn{background:#0b0d0f;border:1px solid var(--border);color:#cfd2d6;border-radius:12px;padding:10px 12px;cursor:pointer}
-.iconbtn:hover{border-color:var(--green);color:#fff}
-.grid{display:grid;gap:16px}
-.cards{grid-template-columns:repeat(auto-fill,minmax(260px,1fr))}
-.card{background:linear-gradient(180deg,var(--card),var(--card-2));border:1px solid var(--border);border-radius:16px;padding:16px;box-shadow:var(--shadow)}
-.card h3{margin:0 0 8px}
-.row{display:flex;gap:12px;flex-wrap:wrap}
-.row > *{flex:1 1 220px}
-input,select,textarea{background:#0b0d0f;color:var(--text);border:1px solid var(--border);border-radius:12px;padding:10px 12px;outline:none;transition:.2s;width:100%}
-input:focus,select:focus,textarea:focus{border-color:var(--green);box-shadow:0 0 0 2px rgba(0,166,81,.25)}
-label{font-size:.9rem;color:#b8bfc7}
-.btn{background:var(--green);color:#021;border:none;border-radius:12px;padding:10px 14px;cursor:pointer;font-weight:700;letter-spacing:.2px;box-shadow:0 10px 22px rgba(0,166,81,.22)}
-.btn.ghost{background:transparent;color:var(--green);border:1px solid var(--green)}
-.btn.warn{background:var(--warn);color:#1a1400}
-.btn.bad{background:var(--bad);color:#fff}
-.btn.mono{background:#17191c;color:#d7dde3;border:1px solid var(--border)}
-.badge{display:inline-block;padding:4px 8px;border-radius:999px;border:1px solid var(--border);font-size:.8rem;color:#cfd2d6;margin-left:8px}
-.badge.ok{border-color:var(--green);color:var(--green)}
-.table{width:100%;border-collapse:collapse}
-.table th,.table td{border-bottom:1px solid var(--border);padding:10px 8px;text-align:left}
-.kpi{font-size:1.8rem;font-weight:900;letter-spacing:.3px}
-.kpi small{display:block;color:var(--soft);font-weight:600;font-size:.9rem}
-hr{border:none;border-top:1px solid var(--border);margin:12px 0}
-.small{font-size:.85rem;color:#aab0b6}
-.footer{position:fixed;left:0;right:0;bottom:0;padding:8px;background:linear-gradient(180deg,rgba(0,0,0,0),rgba(0,0,0,.65) 40%);text-align:center;font-size:.85rem;color:#8f98a3}
-.section{display:none}
-.section.active{display:block}
-.quick{display:flex;gap:8px;flex-wrap:wrap}
-.helper{color:#9aa0a6;font-size:.9rem}
-.printable{background:#fff;color:#000;padding:16px;border-radius:12px}
-@media print {.no-print{display:none !important} .printable{box-shadow:none} body{background:#fff}}
-.sweep{position:absolute;inset:-40px -40px auto auto;width:240px;height:240px;filter: blur(40px);background: radial-gradient(60% 60% at 60% 40%, rgba(0,166,81,.6), transparent 60%);opacity:.35; pointer-events:none}
-/* Drawer */
-.drawer{position:fixed;inset:0;z-index:30;display:none}
-.drawer.open{display:block}
-.drawer .backdrop{position:absolute;inset:0;background:rgba(0,0,0,.5)}
-.panel{position:absolute;right:0;top:0;bottom:0;width:340px;max-width:86vw;background:#0b0d0f;border-left:1px solid var(--border);box-shadow:-12px 0 32px rgba(0,0,0,.5);padding:16px;overflow:auto}
-.group{margin-bottom:16px;border:1px solid var(--border);border-radius:12px;padding:12px;background:#0d0f12}
-.group h4{margin:0 0 8px;color:#cfd2d6}
-.group button{width:100%;text-align:left;margin:4px 0}
-.closeX{position:absolute;right:12px;top:10px;background:transparent;border:1px solid var(--border);color:#cfd2d6;border-radius:8px;padding:6px 10px;cursor:pointer}
+  :root{--green:#00A651;--ink:#e7f8ee;--muted:#9fb1a7;--border:#1b1f23;--bg0:#050607;--bg1:#0a0c0f;}
+  *{box-sizing:border-box} html,body{height:100%}
+  body{margin:0;background:radial-gradient(1200px 800px at 10% -10%, #0b1510 0%, #050607 35%) fixed;
+       color:var(--ink);font:14px/1.45 Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,"Open Sans","Montserrat",Arial}
+  .wrap{max-width:1200px;margin:0 auto;padding:14px 16px}
+  header{position:sticky;top:0;z-index:1000;background:linear-gradient(180deg,rgba(5,6,7,.9),rgba(5,6,7,.7));backdrop-filter:saturate(140%) blur(8px);border-bottom:1px solid var(--border)}
+  .brand{display:flex;align-items:center;gap:10px}
+  .logo{height:44px;width:44px;border-radius:10px;overflow:hidden;border:1px solid #0d3926;box-shadow:0 0 12px rgba(0,166,81,.35) inset;background:#0a1511;display:grid;place-items:center}
+  .logo img{max-width:100%;max-height:100%;display:block}
+  .title{font-weight:900;letter-spacing:.6px}
+  .gear{margin-left:auto;border:1px solid var(--border);background:linear-gradient(180deg,#0b0f12,#07090b);border-radius:12px;padding:8px 10px;cursor:pointer}
+  .gear:after{content:"⚙️";font-size:16px}
+  .primary-nav{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
+  .tab-btn{padding:8px 12px;border:1px solid var(--border);background:linear-gradient(180deg,#0b0f12,#07090b);color:var(--ink);border-radius:12px;cursor:pointer}
+  .tab-btn.active{border-color:#1d6a46;box-shadow:0 0 0 2px rgba(0,166,81,.18) inset}
+  main{padding:22px 0 44px}
+  .card{background:linear-gradient(180deg,#0b0f12,#080a0c);border:1px solid var(--border);border-radius:16px;padding:16px}
+  .grid{display:grid;gap:16px}.g2{grid-template-columns:1fr 1fr}.g3{grid-template-columns:repeat(3,1fr)}
+  @media(max-width:1024px){.g2,.g3{grid-template-columns:1fr}}
+  h2,h3{margin:0 0 10px 0} h2{font-size:18px} h3{font-size:15px;color:var(--muted)}
+  label{display:block;font-size:12px;color:#cfe6d7;margin-bottom:6px}
+  input,select,textarea{width:100%;background:#0b0e10;color:var(--ink);border:1px solid var(--border);border-radius:12px;padding:10px;outline:none}
+  input:focus,select:focus,textarea:focus{border-color:#1d6a46;box-shadow:0 0 0 3px rgba(0,166,81,.15)}
+  .btn{padding:10px 12px;border-radius:12px;border:1px solid var(--border);background:#0a0d0f;color:var(--ink);cursor:pointer}
+  .btn.primary{background:linear-gradient(180deg,#0aa75d,#068645);color:#001a0e;font-weight:900;border-color:#10c06d}
+  .btn.small{font-size:12px;padding:6px 8px}
+  table{width:100%;border-collapse:collapse}th,td{padding:8px 6px;border-bottom:1px dashed var(--border);text-align:left}
+  th{color:#cfe6d7;font-weight:700}
+  .right{text-align:right}.note{color:var(--muted);font-size:12px}
+  .kpi{padding:14px;border-radius:16px;background:linear-gradient(180deg,#0b1a14,#08110d);border:1px solid #0e2c1d;box-shadow:0 0 12px rgba(0,166,81,.2) inset}
+  .kpi .label{font-size:12px;color:#a6c5b5}.kpi .value{font-size:22px;font-weight:900}
+  /* Drawer */
+  .drawer{position:fixed;top:0;right:-340px;width:320px;height:100%;background:#07090b;border-left:1px solid var(--border);transition:right .2s ease;z-index:2000;padding:16px;overflow:auto}
+  .drawer.open{right:0}
+  .drawer h3{margin-top:8px}
+  .drawer .group{margin:8px 0 16px 0;border:1px solid var(--border);border-radius:12px;padding:8px 10px}
+  .drawer .link{display:block;margin:6px 0;padding:8px;border:1px solid var(--border);border-radius:10px;background:#0a0d0f;cursor:pointer}
+  /* Add-ons readability */
+  .addon{display:grid;grid-template-columns:1fr 120px 120px;gap:8px;align-items:center;margin-bottom:8px}
+  .addon .name{white-space:normal;line-height:1.2}
+  .addon input[type="number"]{width:100%}
+  @media(max-width:720px){.addon{grid-template-columns:1fr 1fr;grid-auto-rows:auto}.addon .price-wrap{display:flex;gap:8px}}
 </style>
 </head>
 <body>
-<div class="app">
-  <div class="header no-print">
+<header>
+  <div class="wrap">
     <div class="brand">
-      <img src="logo-header.png" alt="Polish Crew logo">
-      <div class="title">
-        <h1>POLISH <span class="green">CREW</span> — Accounting (PWA)</h1>
-        <small>Installable • Offline • Dark/Futuristic</small>
-      </div>
+      <div class="logo"><img id="headerLogo" alt="logo"></div>
+      <div class="title" id="headerTitle">POLISH CREW — Accounting</div>
+      <button class="gear" id="gearBtn" title="More"></button>
     </div>
-
-    <!-- Primary nav -->
-    <div class="nav" id="navPrimary"></div>
+    <nav class="primary-nav" id="tabs"></nav>
   </div>
+</header>
 
-  <!-- Hidden secondary nav in a slide-out drawer -->
-  <div class="drawer" id="moreDrawer" aria-hidden="true">
-    <div class="backdrop" onclick="toggleDrawer(false)"></div>
-    <div class="panel">
-      <button class="closeX" onclick="toggleDrawer(false)">Close ✕</button>
-      <h3>More</h3>
-      <div class="group">
-        <h4>Operations</h4>
-        <button class="btn mono" onclick="go('Menu Editor');toggleDrawer(false)">Menu Editor</button>
-      </div>
-      <div class="group">
-        <h4>Records</h4>
-        <button class="btn mono" onclick="go('Mileage');toggleDrawer(false)">Mileage</button>
-        <button class="btn mono" onclick="go('Transactions');toggleDrawer(false)">Transactions</button>
-        <button class="btn mono" onclick="go('Expenses');toggleDrawer(false)">Expenses</button>
-      </div>
-      <div class="group">
-        <h4>Data</h4>
-        <button class="btn mono" onclick="go('Export/Import');toggleDrawer(false)">Export / Import</button>
-      </div>
-      <div class="group">
-        <h4>App</h4>
-        <button class="btn mono" onclick="go('Settings');toggleDrawer(false)">Settings</button>
-      </div>
-    </div>
+<aside class="drawer" id="drawer">
+  <h2 style="margin:0 0 6px 0">More</h2>
+  <div class="group">
+    <h3>Operations</h3>
+    <a class="link" data-open="menu">Menu Editor</a>
   </div>
-
-  <div id="sections">
-    <!-- DASHBOARD -->
-    <section class="section active" id="Dashboard">
-      <div class="sweep"></div>
-      <div class="grid cards">
-        <div class="card">
-          <h3>Today</h3>
-          <div class="kpi" id="kpiToday">$0<span class="small"><small>Income</small></span></div>
-          <hr/>
-          <div class="row">
-            <div><label>Open Jobs</label><div class="kpi" id="kpiOpen">0</div></div>
-            <div><label>Unpaid</label><div class="kpi" id="kpiUnpaid">0</div></div>
-          </div>
-        </div>
-        <div class="card">
-          <h3>Month to Date</h3>
-          <div class="row">
-            <div><div class="kpi" id="kpiMTDIncome">$0<small>Income</small></div></div>
-            <div><div class="kpi" id="kpiMTDExpense">$0<small>Expenses</small></div></div>
-            <div><div class="kpi" id="kpiMTDNet">$0<small>Net</small></div></div>
-          </div>
-        </div>
-        <div class="card">
-          <h3>Quick Actions</h3>
-          <div class="quick">
-            <button class="btn" onclick="go('Jobs')">Start a Quote</button>
-            <button class="btn ghost" onclick="go('Expenses')">Add Expense</button>
-            <button class="btn ghost" onclick="go('Clients')">Add Client</button>
-            <button class="iconbtn" title="More" onclick="toggleDrawer(true)">⋯</button>
-            <button class="iconbtn" title="Settings" onclick="toggleDrawer(true)">⚙️</button>
-          </div>
-          <p class="helper">Tip: Export JSON at end of day to keep a backup.</p>
-        </div>
-      </div>
-    </section>
-
-    <!-- JOBS -->
-    <section class="section" id="Jobs">
-      <div class="grid cards">
-        <div class="card">
-          <h3>Quote → Book → Work → Pay <span class="badge ok">Guided</span></h3>
-          <div id="jobForm"></div>
-        </div>
-        <div class="card">
-          <h3>Open Jobs</h3>
-          <div id="jobList"></div>
-        </div>
-      </div>
-    </section>
-
-    <!-- TRANSACTIONS -->
-    <section class="section" id="Transactions">
-      <div class="grid cards">
-        <div class="card">
-          <h3>Transactions</h3>
-          <div class="row">
-            <input id="txSearch" placeholder="Search (client, type, method, note)" oninput="renderTransactions()"/>
-            <button class="btn ghost" onclick="exportCSV()">Export CSV</button>
-          </div>
-          <div id="txTable"></div>
-        </div>
-      </div>
-    </section>
-
-    <!-- CLIENTS -->
-    <section class="section" id="Clients">
-      <div class="grid cards">
-        <div class="card">
-          <h3>Add / Edit Client</h3>
-          <div id="clientForm"></div>
-        </div>
-        <div class="card">
-          <h3>Client List</h3>
-          <div id="clientList"></div>
-        </div>
-      </div>
-    </section>
-
-    <!-- MENU EDITOR -->
-    <section class="section" id="Menu Editor">
-      <div class="grid cards">
-        <div class="card">
-          <h3>Packages (by vehicle size)</h3>
-          <div id="menuPackages"></div>
-        </div>
-        <div class="card">
-          <h3>Add-ons</h3>
-          <div id="menuAddons"></div>
-        </div>
-        <div class="card">
-          <h3>Maintenance Program</h3>
-          <div id="menuMaint"></div>
-        </div>
-        <div class="card">
-          <h3>Actions</h3>
-          <button class="btn bad" onclick="resetMenu()">Reset to Official v9</button>
-          <span class="small">This will overwrite current prices with menu defaults.</span>
-        </div>
-      </div>
-    </section>
-
-    <!-- EXPENSES -->
-    <section class="section" id="Expenses">
-      <div class="grid cards">
-        <div class="card">
-          <h3>New Expense</h3>
-          <div id="expenseForm"></div>
-        </div>
-        <div class="card">
-          <h3>Expenses</h3>
-          <div class="row">
-            <input id="expSearch" placeholder="Search (category, vendor, method, note)" oninput="renderExpenses()"/>
-          </div>
-          <div id="expenseTable"></div>
-        </div>
-      </div>
-    </section>
-
-    <!-- MILEAGE -->
-    <section class="section" id="Mileage">
-      <div class="grid cards">
-        <div class="card">
-          <h3>Log Mileage</h3>
-          <div id="mileageForm"></div>
-        </div>
-        <div class="card">
-          <h3>Mileage Log</h3>
-          <div id="mileageTable"></div>
-        </div>
-      </div>
-    </section>
-
-    <!-- EXPORT / IMPORT -->
-    <section class="section" id="Export/Import">
-      <div class="grid cards">
-        <div class="card">
-          <h3>Backup / Restore</h3>
-          <div class="row">
-            <button class="btn" onclick="exportJSON()">Export JSON</button>
-            <label class="btn ghost" for="importFile">Import JSON</label>
-            <input id="importFile" type="file" accept="application/json" style="display:none" onchange="importJSON(this.files[0])"/>
-          </div>
-          <p class="small">Export regularly to keep a backup.</p>
-          <hr/>
-          <h3>Print Quote / Receipt</h3>
-          <div id="printArea" class="printable">
-            <h2>POLISH CREW — Quote / Receipt</h2>
-            <div id="printContent">Choose a Job in Jobs → Quote to render.</div>
-          </div>
-          <div class="no-print" style="margin-top:8px">
-            <button class="btn" onclick="window.print()">Print / Save as PDF</button>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- SETTINGS -->
-    <section class="section" id="Settings">
-      <div class="grid cards">
-        <div class="card">
-          <h3>Brand & App Settings</h3>
-          <div class="row">
-            <div><label>Business Name</label><input id="bizName" placeholder="Polish Crew Mobile Detailing" oninput="state.settings.bizName=this.value;save()"/></div>
-            <div><label>Phone</label><input id="bizPhone" placeholder="(XXX) XXX-XXXX" oninput="state.settings.bizPhone=this.value;save()"/></div>
-            <div><label>Email</label><input id="bizEmail" placeholder="book@polishcrew.example" oninput="state.settings.bizEmail=this.value;save()"/></div>
-            <div><label>Address / Service Area</label><input id="bizAddr" placeholder="Inland Empire, CA" oninput="state.settings.bizAddr=this.value;save()"/></div>
-          </div>
-          <p class="small">This info appears on printed quotes/receipts.</p>
-        </div>
-      </div>
-    </section>
+  <div class="group">
+    <h3>Records</h3>
+    <a class="link" data-open="mileage">Mileage</a>
+    <a class="link" data-open="transactions">Transactions</a>
+    <a class="link" data-open="expense">Expenses</a>
   </div>
+  <div class="group">
+    <h3>Data</h3>
+    <a class="link" data-open="backup">Export / Import</a>
+  </div>
+  <div class="group">
+    <h3>App</h3>
+    <a class="link" data-open="settings">Settings</a>
+  </div>
+</aside>
 
-  <div class="footer no-print">POLISH CREW • We Bring the Shine • Mobile Auto Detailing at Your Door</div>
-</div>
+<main class="wrap"><div id="view"></div></main>
+<footer class="wrap note">Offline & local. Export JSON to your USB after each day.</footer>
 
 <script>
+// PWA register
 if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => navigator.serviceWorker.register('./service-worker.js').catch(()=>{}));
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('./service-worker.js');
+  });
 }
 
-const VEHICLE_SIZES = ["Coupe","Sedan","Crossover / Small SUV","Large SUV / Truck"];
-const JOB_STATUS = ["Quoted","Booked","In Progress","Complete","Paid"];
-const DEFAULT_MENU = {
-  packages: {
-    "Exterior Wash": {"Coupe":60,"Sedan":65,"Crossover / Small SUV":75,"Large SUV / Truck":85},
-    "Interior Refresh": {"Coupe":80,"Sedan":90,"Crossover / Small SUV":100,"Large SUV / Truck":110},
-    "Full Detail (Inside & Out)": {"Coupe":100,"Sedan":120,"Crossover / Small SUV":140,"Large SUV / Truck":160}
-  },
-  addons: [
-    {name:"Seat Spot Clean", priceRange:"25–40", base:25},
-    {name:"Clay Bar Decontamination", price:50},
-    {name:"Iron Remover Treatment", price:25},
-    {name:"Engine Bay Clean", price:50},
-    {name:"Odor Neutralizer", price:25},
-    {name:"Trim Restore", price:25}
-  ],
-  maintenance: {
-    weekly_biweekly: {"Coupe":50,"Sedan":55,"Crossover / Small SUV":65,"Large SUV / Truck":75},
-    monthly: {"Coupe":60,"Sedan":65,"Crossover / Small SUV":75,"Large SUV / Truck":85}
-  }
+// ===== State =====
+const STORAGE_KEY="pc_usb_whitelabel_v1";
+const BRAND_SIZES=["Coupe","Sedan","Crossover","SUV/Truck","XL/Lifted"];
+const DEFAULT_MENU={
+  packages:{"Exterior Wash Only":[40,45,50,55,65],"Interior Clean Only":[45,50,55,60,70],"In & Out Combo":[70,75,85,95,110],"Quick In & Out":[65,70,80,90,100],"Maintenance Detail":[100,110,120,130,145],"Full Detail":[125,140,155,175,200],"Dog Hair / Stain Focus (Interior)":[100,110,120,130,150]},
+  addons:{"Wheels & Tires (deep clean)":[12,12,15,18,20],"Exterior Brush Detail":[15,15,20,25,25],"Interior Brush Detail":[15,15,20,25,25],"Interior Protectant":[10,10,15,20,20],"Dog Hair Removal (range)":[30,35,60,80,100],"Spot Stain Clean (1–3)":[28,33,38,45,50],"Odor Neutralizer":[25,25,30,35,35],"Engine Bay Clean":[40,45,50,60,60],"Trim Restore":[25,25,30,35,35],"Spray Wax":[12,12,15,20,25],"Paste Wax":[22,25,30,35,35],"Spray Sealant (3–6 mo)":[32,35,40,45,45],"Spray Ceramic (6–12 mo)":[42,45,50,55,55],"Clay & Iron Decon":[48,50,55,65,65]},
+  guidance:"≤3 add-ons = Maintenance. 4+ or heavy soil → Full Detail upgrade."
 };
-let state = {clients:[],transactions:[],expenses:[],mileage:[],jobs:[],menu:JSON.parse(JSON.stringify(DEFAULT_MENU)),settings:{bizName:"Polish Crew",bizPhone:"",bizEmail:"",bizAddr:""}};
-function save(){ localStorage.setItem("pc_usb_state", JSON.stringify(state)); refreshKPIs(); }
-function load(){ const s=localStorage.getItem("pc_usb_state"); if(s){ try{state=JSON.parse(s)}catch(e){} } }
-function resetMenu(){ state.menu=JSON.parse(JSON.stringify(DEFAULT_MENU)); save(); renderMenuEditor(); }
-function uid(){return Math.random().toString(36).slice(2)+Date.now().toString(36)}
+const DEFAULT_STATE={
+  business:{ name:"Polish Crew", headerTitle:"POLISH CREW — Accounting", logoDataUrl:"" },
+  menu: DEFAULT_MENU,
+  clients:[], transactions:[], jobs:[], mileage:[],
+  settings:{ paymentMethods:["Cash","Card","Zelle","Venmo","CashApp","Bank"], categories:["Package","Add-on","Supplies","Fuel","Tools/Equipment","Marketing","Labor/Subcontract","Fees","Other"] }
+};
+const $=(s,r=document)=>r.querySelector(s), $$=(s,r=document)=>Array.from(r.querySelectorAll(s));
+const uid=()=>Math.random().toString(36).slice(2,9);
+const fmt=n=>(Number(n)||0).toLocaleString(undefined,{style:"currency",currency:"USD"});
+const today=()=>new Date().toISOString().slice(0,10);
+let state=load();
+function load(){ const raw=localStorage.getItem(STORAGE_KEY); if(!raw){ localStorage.setItem(STORAGE_KEY, JSON.stringify(DEFAULT_STATE)); return structuredClone(DEFAULT_STATE); } try{ const o=JSON.parse(raw); if(!o.menu)o.menu=DEFAULT_MENU; if(!o.jobs)o.jobs=[]; return o; }catch(e){ return structuredClone(DEFAULT_STATE); } }
+function save(){ localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }
+function setHeader(){ $("#headerTitle").textContent=state.business.headerTitle||"POLISH CREW — Accounting"; const img=$("#headerLogo"); img.src = state.business.logoDataUrl || "logo-header.png"; }
+setHeader();
 
-const primaryTabs=["Dashboard","Jobs","Clients"];
-const navPrimary=document.getElementById('navPrimary'); const sections=document.querySelectorAll('.section');
-function buildNav(){ navPrimary.innerHTML=""; primaryTabs.forEach(t=>{ const b=document.createElement('button'); b.textContent=t; b.onclick=()=>go(t); if(t==="Dashboard") b.classList.add('active'); navPrimary.appendChild(b); }); const spacer=document.createElement('div'); spacer.className='spacer'; navPrimary.appendChild(spacer); const more=document.createElement('button'); more.className='iconbtn'; more.title='More'; more.textContent='⋯'; more.onclick=()=>toggleDrawer(true); navPrimary.appendChild(more); const gear=document.createElement('button'); gear.className='iconbtn'; gear.title='Settings & More'; gear.textContent='⚙️'; gear.onclick=()=>toggleDrawer(true); navPrimary.appendChild(gear); }
-buildNav();
+// Primary tabs
+const TABS=[{id:"dashboard",label:"Dashboard"},{id:"jobs",label:"Jobs (Quote→Pay)"},{id:"clients",label:"Clients"}];
+let currentTab="dashboard";
+function renderTabs(){ const nav=$("#tabs"); nav.innerHTML=""; TABS.forEach(t=>{ const b=document.createElement("button"); b.className="tab-btn"+(t.id===currentTab?" active":""); b.textContent=t.label; b.onclick=()=>{ currentTab=t.id; render(); }; nav.appendChild(b); }); }
+renderTabs();
 
-function toggleDrawer(open){ const d=document.getElementById('moreDrawer'); if(open){ d.classList.add('open'); d.setAttribute('aria-hidden','false'); } else { d.classList.remove('open'); d.setAttribute('aria-hidden','true'); } }
-function go(tab){ sections.forEach(s=>s.classList.remove('active')); document.getElementById(tab).classList.add('active'); navPrimary.querySelectorAll('button').forEach(b=>{ if(b.textContent===tab) b.classList.add('active'); else b.classList.remove('active'); }); if(tab==="Jobs") renderJobs(); if(tab==="Transactions") renderTransactions(); if(tab==="Clients") renderClients(); if(tab==="Menu Editor") renderMenuEditor(); if(tab==="Expenses") renderExpenses(); if(tab==="Mileage") renderMileage(); if(tab==="Dashboard") refreshKPIs(); }
+// Drawer
+const drawer=$("#drawer"); $("#gearBtn").onclick=()=> drawer.classList.toggle("open");
+drawer.addEventListener("click", (e)=>{ if(e.target.classList.contains("link")){ currentTab=e.target.dataset.open; drawer.classList.remove("open"); render(); } });
 
-function inMonth(t){ const d=new Date(t.date), now=new Date(); return d.getMonth()===now.getMonth() && d.getFullYear()===now.getFullYear(); }
-function refreshKPIs(){ const today=new Date().toISOString().slice(0,10); const ti=state.transactions.filter(t=>t.type==="income"&&t.date.slice(0,10)===today).reduce((a,b)=>a+b.amount,0); document.getElementById('kpiToday').textContent=currency(ti); const open=state.jobs.filter(j=>["Quoted","Booked","In Progress","Complete"].includes(j.status)).length; const unpaid=state.jobs.filter(j=>j.status!=="Paid").length; document.getElementById('kpiOpen').textContent=open; document.getElementById('kpiUnpaid').textContent=unpaid; const mI=state.transactions.filter(t=>t.type==="income").filter(inMonth).reduce((a,b)=>a+b.amount,0); const mE=state.transactions.filter(t=>t.type==="expense").filter(inMonth).reduce((a,b)=>a+b.amount,0); document.getElementById('kpiMTDIncome').textContent=currency(mI); document.getElementById('kpiMTDExpense').textContent=currency(mE); document.getElementById('kpiMTDNet').textContent=currency(mI-mE); }
-function currency(n){return "$"+(Number(n||0).toFixed(2))}
+// Router
+function render(){ renderTabs(); const v=$("#view"); v.innerHTML="";
+  if(currentTab==="dashboard") return renderDashboard(v);
+  if(currentTab==="jobs") return renderJobs(v);
+  if(currentTab==="clients") return renderClients(v);
+  if(currentTab==="transactions") return renderTransactions(v);
+  if(currentTab==="expense") return renderExpense(v);
+  if(currentTab==="mileage") return renderMileage(v);
+  if(currentTab==="menu") return renderMenu(v);
+  if(currentTab==="backup") return renderBackup(v);
+  if(currentTab==="settings") return renderSettings(v);
+}
+render();
 
-function renderClients(){ const f=document.getElementById('clientForm'); f.innerHTML=`
-  <div class="row">
-    <div><label>Name</label><input id="cName" placeholder="Client name"></div>
-    <div><label>Phone</label><input id="cPhone" placeholder="(xxx) xxx-xxxx"></div>
-    <div><label>Email</label><input id="cEmail" placeholder="email@client.com"></div>
-  </div>
-  <div class="row">
-    <div><label>Default Discount Type</label><select id="cDType"><option value="none">None</option><option value="percent">% Percent</option><option value="flat">$ Flat</option></select></div>
-    <div><label>Default Discount Value</label><input id="cDVal" type="number" step="1" placeholder="e.g., 15"></div>
-    <div style="align-self:end"><button class="btn" onclick="saveClient()">Save Client</button></div>
-  </div>`; const list=document.getElementById('clientList'); if(state.clients.length===0){list.innerHTML="<p class='small'>No clients yet.</p>";return;} let html=`<table class="table"><thead><tr><th>Name</th><th>Contact</th><th>Discount</th><th></th></tr></thead><tbody>`; for(const c of state.clients){ const d=c.discount?.type&&c.discount.type!=='none'?(c.discount.type==='percent'?`${c.discount.value}%`:`$${c.discount.value}`):"-"; html+=`<tr><td>${esc(c.name)}</td><td class="small">${esc(c.phone||"")}<br>${esc(c.email||"")}</td><td>${d}</td><td><button class="btn mono" onclick="editClient('${c.id}')">Edit</button> <button class="btn bad" onclick="delClient('${c.id}')">Delete</button></td></tr>`; } html+=`</tbody></table>`; list.innerHTML=html; }
-function saveClient(){ const name=g('cName').value.trim(); if(!name) return alert("Name required"); const c={id:uid(),name,phone:g('cPhone').value.trim(),email:g('cEmail').value.trim(),discount:{type:g('cDType').value,value:Number(g('cDVal').value||0)}}; state.clients.push(c); save(); renderClients(); g('cName').value=g('cPhone').value=g('cEmail').value=g('cDVal').value=""; g('cDType').value='none'; }
-function editClient(id){ const c=state.clients.find(x=>x.id===id); if(!c) return; g('cName').value=c.name||""; g('cPhone').value=c.phone||""; g('cEmail').value=c.email||""; g('cDType').value=c.discount?.type||"none"; g('cDVal').value=c.discount?.value||0; const oldSave=saveClient; window.saveClient=function(){ c.name=g('cName').value.trim(); c.phone=g('cPhone').value.trim(); c.email=g('cEmail').value.trim(); c.discount={type:g('cDType').value,value:Number(g('cDVal').value||0)}; save(); renderClients(); window.saveClient=oldSave; g('cName').value=g('cPhone').value=g('cEmail').value=g('cDVal').value=""; g('cDType').value='none'; } }
-function delClient(id){ if(!confirm("Delete this client?")) return; state.clients=state.clients.filter(c=>c.id!==id); save(); renderClients(); }
-
-function renderMenuEditor(){ const mp=document.getElementById('menuPackages'); let html=`<table class="table"><thead><tr><th>Service</th>${VEHICLE_SIZES.map(s=>`<th>${s}</th>`).join("")}</tr></thead><tbody>`; for(const [svc,map] of Object.entries(state.menu.packages)){ html+=`<tr><td>${esc(svc)}</td>`; for(const size of VEHICLE_SIZES){ html+=`<td><input type="number" value="${map[size]??0}" onchange="state.menu.packages[${JSON.stringify(svc)}][${JSON.stringify(size)}]=Number(this.value);save()"></td>`; } html+=`</tr>`; } html+=`</tbody></table>`; mp.innerHTML=html; const ma=document.getElementById('menuAddons'); let ahtml=`<table class="table"><thead><tr><th>Name</th><th>Price</th><th>Low–High</th></tr></thead><tbody>`; state.menu.addons.forEach((a,i)=>{ ahtml+=`<tr><td><input value="${esc(a.name)}" onchange="state.menu.addons[${i}].name=this.value;save()"></td><td><input type="number" value="${a.price??a.base??0}" onchange="(state.menu.addons[${i}].price=Number(this.value), delete state.menu.addons[${i}].base); save()"></td><td><input value="${esc(a.priceRange||'')}" placeholder="e.g., 25–40" onchange="state.menu.addons[${i}].priceRange=this.value;save()"></td></tr>`; }); ahtml+=`</tbody></table>`; ma.innerHTML=ahtml; const mm=document.getElementById('menuMaint'); let mhtml=`<h4>Weekly / Biweekly</h4><table class="table"><thead><tr>${VEHICLE_SIZES.map(s=>`<th>${s}</th>`).join("")}</tr></thead><tbody><tr>`; for(const s of VEHICLE_SIZES){ mhtml+=`<td><input type="number" value="${state.menu.maintenance.weekly_biweekly[s]??0}" onchange="state.menu.maintenance.weekly_biweekly[${JSON.stringify(s)}]=Number(this.value);save()"></td>`; } mhtml+=`</tr></tbody></table>`; mhtml+=`<h4>Monthly (3–4 weeks)</h4><table class="table"><thead><tr>${VEHICLE_SIZES.map(s=>`<th>${s}</th>`).join("")}</tr></thead><tbody><tr>`; for(const s of VEHICLE_SIZES){ mhtml+=`<td><input type="number" value="${state.menu.maintenance.monthly[s]??0}" onchange="state.menu.maintenance.monthly[${JSON.stringify(s)}]=Number(this.value);save()"></td>`; } mhtml+=`</tr></tbody></table>`; mm.innerHTML=mhtml; }
-
-function renderJobs(){ const jf=document.getElementById('jobForm'); const clients=state.clients.map(c=>`<option value="${c.id}">${esc(c.name)}</option>`).join(""); const pkgs=Object.keys(state.menu.packages).map(p=>`<option>${esc(p)}</option>`).join(""); jf.innerHTML=`
-  <div class="row">
-    <div><label>Client</label><select id="jClient"><option value="">Select...</option>${clients}</select><div id="quickAddClient" class="small" style="margin-top:6px"></div></div>
-    <div><label>Vehicle Size</label><select id="jSize">${VEHICLE_SIZES.map(s=>`<option>${s}</option>`)}</select></div>
-    <div><label>Package</label><select id="jPkg">${pkgs}</select></div>
-    <div><label>Date</label><input id="jDate" type="date" value="${today()}"></div>
-  </div>
-  <div class="row">
-    <div><label>Base Price</label><input id="jBase" type="number" placeholder="Auto from menu"></div>
-    <div><label>Discount Type</label><select id="jDType"><option value="none">None</option><option value="percent">% Percent</option><option value="flat">$ Flat</option></select></div>
-    <div><label>Discount Value</label><input id="jDVal" type="number" step="1" value="0"></div>
-    <div style="align-self:end" class="quick">
-      <button class="btn mono" onclick="quickDiscount('10%')">10%</button>
-      <button class="btn mono" onclick="quickDiscount('$10')">$10</button>
-      <button class="btn mono" onclick="quickDiscount('$20')">$20</button>
-      <button class="btn mono" onclick="quickDiscount('F&F')">F&F 15%</button>
-      <button class="btn mono" onclick="quickDiscount('20%')">20%</button>
+// Dashboard
+function renderDashboard(root){
+  const now=new Date(), y=now.getFullYear(), m=now.getMonth();
+  const monthTx=state.transactions.filter(t=>{const d=new Date(t.date); return d.getFullYear()===y&&d.getMonth()===m;});
+  const inc=monthTx.filter(t=>t.type==="Income").reduce((a,b)=>a+Number(b.amount||0),0);
+  const exp=monthTx.filter(t=>t.type==="Expense").reduce((a,b)=>a+Number(b.amount||0),0);
+  root.innerHTML=`
+    <div class="grid g3">
+      <div class="kpi"><div class="label">Income (This Month)</div><div class="value" style="color:#4ff6a9">${fmt(inc)}</div></div>
+      <div class="kpi"><div class="label">Expenses (This Month)</div><div class="value" style="color:#ff9090">${fmt(exp)}</div></div>
+      <div class="kpi"><div class="label">Net</div><div class="value">${fmt(inc-exp)}</div></div>
     </div>
-  </div>
-  <div><label>Add-ons (adjust price as needed)</label><div id="jAddons"></div></div>
-  <div class="row"><div><label>Notes</label><textarea id="jNotes" rows="2" placeholder="Address, gate code, timing, etc."></textarea></div></div>
-  <div class="row">
-    <div><strong>Total:</strong> <span id="jTotal">$0.00</span></div>
-    <div class="quick"><button class="btn" onclick="saveJob()">Save Job</button><button class="btn ghost" onclick="quotePrint()">Print / Save Quote</button></div>
-  </div>`; g('jPkg').onchange=autoBase; g('jSize').onchange=autoBase; g('jClient').onchange=loadClientDiscount; autoBase(); buildJobAddons(); updateJobTotal(); quickAddClientUI(); listJobs(); }
-function today(){return new Date().toISOString().slice(0,10)}
-function autoBase(){ const size=g('jSize').value; const pkg=g('jPkg').value; const v=state.menu.packages[pkg]?.[size]??0; g('jBase').value=v; updateJobTotal(); }
-function loadClientDiscount(){ const id=g('jClient').value; const c=state.clients.find(x=>x.id===id); if(!c||!c.discount) return; const {type,value}=c.discount; g('jDType').value=type||'none'; g('jDVal').value=value||0; updateJobTotal(); }
-function quickDiscount(kind){ if(kind==="F&F"){ g('jDType').value='percent'; g('jDVal').value=15; } else if(kind.endsWith('%')){ g('jDType').value='percent'; g('jDVal').value=parseInt(kind) } else { g('jDType').value='flat'; g('jDVal').value=parseInt(kind.replace(/\D/g,'')) } updateJobTotal(); }
-function buildJobAddons(){ const wrap=document.getElementById('jAddons'); wrap.innerHTML=""; state.menu.addons.forEach((a,i)=>{ const row=document.createElement('div'); row.className='row'; const price=(a.price??a.base??0); row.innerHTML=`
-    <div style="flex:0 0 28px; display:grid; place-items:center"><input type="checkbox" id="ad_${i}" onchange="updateJobTotal()"></div>
-    <div style="flex:1"><input value="${esc(a.name)}" disabled></div>
-    <div style="flex:0 0 160px"><input id="ap_${i}" type="number" value="${price}" onchange="updateJobTotal()"></div>`; wrap.appendChild(row); }); }
-function selectedAddons(){ const ads=[]; state.menu.addons.forEach((a,i)=>{ if(g('ad_'+i)?.checked){ ads.push({name:a.name, price:Number(g('ap_'+i).value||0)}); } }); return ads; }
-function calcDiscount(subtotal,type,value){ if(type==='percent') return subtotal*(value/100); if(type==='flat') return Math.min(subtotal,value); return 0; }
-function updateJobTotal(){ const base=Number(g('jBase').value||0); const addons=selectedAddons().reduce((a,b)=>a+b.price,0); const sub=base+addons; const d=calcDiscount(sub,g('jDType').value,Number(g('jDVal').value||0)); const total=Math.max(0,sub-d); g('jTotal').textContent=currency(total); return total; }
-function saveJob(){ const id=uid(); const clientId=g('jClient').value; if(!clientId) return alert("Select a client"); const job={ id, date:g('jDate').value||today(), clientId, vehicleSize:g('jSize').value, packageName:g('jPkg').value, basePrice:Number(g('jBase').value||0), addons:selectedAddons(), discount:{type:g('jDType').value, value:Number(g('jDVal').value||0)}, status:"Quoted", total:updateJobTotal(), paid:0, notes:g('jNotes').value||""}; state.jobs.push(job); save(); listJobs(); alert("Job saved as Quoted."); }
-function listJobs(){ const jl=document.getElementById('jobList'); if(state.jobs.length===0){jl.innerHTML="<p class='small'>No jobs yet.</p>"; return;} let html=`<table class="table"><thead><tr><th>Date</th><th>Client</th><th>Pkg</th><th>Total</th><th>Status</th><th></th></tr></thead><tbody>`; for(const j of state.jobs){ const c=state.clients.find(x=>x.id===j.clientId); html+=`<tr><td>${esc(j.date)}</td><td>${esc(c?c.name:'(deleted)')}</td><td class="small">${esc(j.packageName)}<br><span class="small">${esc(j.vehicleSize)}</span></td><td>${currency(j.total)}</td><td><select onchange="setJobStatus('${j.id}', this.value)">${["Quoted","Booked","In Progress","Complete","Paid"].map(s=>`<option ${j.status===s?'selected':''}>${s}</option>`).join("")}</select></td><td><button class="btn mono" onclick="jobQuote('${j.id}')">Quote</button>${j.status!=='Paid'?` <button class="btn" onclick="takePayment('${j.id}')">Take Payment</button>`:""} <button class="btn ghost" onclick="editJob('${j.id}')">Edit</button> <button class="btn bad" onclick="deleteJob('${j.id}')">Delete</button></td></tr>`; } html+=`</tbody></table>`; jl.innerHTML=html; }
-function setJobStatus(id,status){ const j=state.jobs.find(x=>x.id===id); if(!j) return; j.status=status; save(); listJobs(); }
-function jobQuote(id){ const j=state.jobs.find(x=>x.id===id); if(!j) return; const c=state.clients.find(x=>x.id===j.clientId)||{}; const items=[{name:j.packageName+" — "+j.vehicleSize, price:j.basePrice}, ...j.addons]; const sub=items.reduce((a,b)=>a+b.price,0); const d=calcDiscount(sub,j.discount?.type,j.discount?.value||0); const tot=Math.max(0,sub-d); const biz=state.settings; g('printContent').innerHTML=`
-  <div class="row" style="gap:24px">
-    <div style="flex:1"><strong>${esc(biz.bizName||'Polish Crew')}</strong><br>${esc(biz.bizPhone||'')}${biz.bizPhone&&biz.bizEmail?' • ':''}${esc(biz.bizEmail||'')}<br>${esc(biz.bizAddr||'')}</div>
-    <div style="text-align:right"><strong>Date:</strong> ${esc(j.date)}<br><strong>Job ID:</strong> ${esc(j.id.slice(-6).toUpperCase())}<br><strong>Status:</strong> ${esc(j.status)}</div>
-  </div><hr>
-  <strong>Client</strong><br>${esc(c.name||'')}<br>${esc(c.phone||'')} ${c.phone&&c.email?'•':''} ${esc(c.email||'')}<hr>
-  <table style="width:100%; border-collapse:collapse" border="1" cellpadding="6">
-    <thead><tr><th align="left">Item</th><th align="right">Price</th></tr></thead>
-    <tbody>${items.map(it=>`<tr><td>${esc(it.name)}</td><td align="right">${currency(it.price)}</td></tr>`).join("")}
-      <tr><td align="right"><em>Discount</em></td><td align="right">-${currency(d)}</td></tr>
-      <tr><td align="right"><strong>Total</strong></td><td align="right"><strong>${currency(tot)}</strong></td></tr>
-    </tbody>
-  </table>
-  <p class="small">Thank you for choosing POLISH CREW — We Bring the Shine.</p>`; go("Export/Import"); }
-function quotePrint(){ alert("Pick the job in the Open Jobs list and click ‘Quote’ to render the printable view, then Print / Save as PDF."); }
-function takePayment(id){ const j=state.jobs.find(x=>x.id===id); if(!j) return; const method=prompt("Payment method (Cash, Card, Zelle, Venmo, etc.):","Cash"); if(method===null) return; const amountStr=prompt(`Amount received (Total ${currency(j.total)}):`, j.total); if(amountStr===null) return; const amount=Number(amountStr||0); if(!(amount>0)) return alert("Invalid amount"); j.paid+=amount; if(j.paid>=j.total){ j.status="Paid"; } const tx={id:uid(), date:new Date().toISOString(), type:"income", amount, method, clientId:j.clientId, note:`${j.packageName} ${j.vehicleSize} (Job ${j.id.slice(-6).toUpperCase()})`, items:[{name:j.packageName, price:j.basePrice}, ...j.addons], discount:j.discount}; state.transactions.push(tx); save(); listJobs(); renderTransactions(); refreshKPIs(); alert(`${currency(amount)} recorded via ${method}. ${j.status==='Paid'?'Job marked Paid.':''}`); }
-function deleteJob(id){ if(!confirm("Delete this job?")) return; state.jobs=state.jobs.filter(j=>j.id!==id); save(); listJobs(); }
-function editJob(id){ const j=state.jobs.find(x=>x.id===id); if(!j) return; go("Jobs"); g('jClient').value=j.clientId; g('jSize').value=j.vehicleSize; g('jPkg').value=j.packageName; g('jDate').value=j.date; g('jBase').value=j.basePrice; g('jDType').value=j.discount?.type||'none'; g('jDVal').value=j.discount?.value||0; buildJobAddons(); state.menu.addons.forEach((a,i)=>{ const found=j.addons.find(k=>k.name===a.name); if(found){ g('ad_'+i).checked=true; g('ap_'+i).value=found.price; } }); g('jNotes').value=j.notes||""; updateJobTotal(); const old=saveJob; window.saveJob=function(){ j.clientId=g('jClient').value; j.vehicleSize=g('jSize').value; j.packageName=g('jPkg').value; j.date=g('jDate').value; j.basePrice=Number(g('jBase').value||0); j.discount={type:g('jDType').value, value:Number(g('jDVal').value||0)}; j.addons=selectedAddons(); j.total=updateJobTotal(); j.notes=g('jNotes').value||""; save(); listJobs(); alert("Job updated."); window.saveJob=old; } }
+    <div class="grid g2" style="margin-top:16px">
+      <div class="card">
+        <h2>Recent Activity</h2>
+        <table><thead><tr><th>Date</th><th>Type</th><th>Item</th><th>Client/Vendor</th><th class="right">Amount</th></tr></thead><tbody id="recent"></tbody></table>
+      </div>
+      <div class="card">
+        <h2>Quick Actions</h2>
+        <div class="primary-nav">
+          <button class="btn primary" onclick="currentTab='jobs'; render();">Start a Quote</button>
+          <button class="btn" onclick="currentTab='expense'; render();">Add Expense</button>
+          <button class="btn" onclick="currentTab='clients'; render();">Add Client</button>
+          <button class="btn" onclick="exportCSV()">Export CSV</button>
+        </div>
+        <p class="note" style="margin-top:10px">Tip: Log fuel/supplies same day so your net stays accurate.</p>
+      </div>
+    </div>`;
+  const recent=[...state.transactions].sort((a,b)=>b.date.localeCompare(a.date)).slice(0,10);
+  $("#recent").innerHTML = recent.map(r=>`<tr>
+    <td>${r.date}</td><td>${r.type}</td><td>${r.item||r.category||"-"}</td>
+    <td>${r.vendor || (state.clients.find(c=>c.id===r.clientId)?.name||"-")}</td>
+    <td class="right">${fmt(r.amount)}</td></tr>`).join("");
+}
 
-function quickAddClientUI(){ const t=document.getElementById('quickAddClient'); if(!t) return; t.innerHTML=`
-  <details><summary class="small">+ Quick add client</summary>
-  <div class="row" style="margin-top:8px">
-    <div><label>Name</label><input id="qaName" placeholder="Client name"></div>
-    <div><label>Phone</label><input id="qaPhone" placeholder="(xxx) xxx-xxxx"></div>
-    <div><label>Email</label><input id="qaEmail" placeholder="email@client.com"></div>
-  </div>
-  <div class="row">
-    <div><label>Default Discount Type</label><select id="qaDType"><option value="none">None</option><option value="percent">% Percent</option><option value="flat">$ Flat</option></select></div>
-    <div><label>Default Discount Value</label><input id="qaDVal" type="number" step="1" placeholder="e.g., 15"></div>
-    <div style="align-self:end"><button class="btn" onclick="quickSaveClient()">Save & Select</button></div>
-  </div></details>`; }
-function quickSaveClient(){ const name=(document.getElementById('qaName')?.value||'').trim(); if(!name){ alert('Name required'); return; } const c={id:uid(), name, phone:document.getElementById('qaPhone')?.value||'', email:document.getElementById('qaEmail')?.value||'', discount:{type:document.getElementById('qaDType')?.value||'none', value:Number(document.getElementById('qaDVal')?.value||0)}}; state.clients.push(c); save(); renderJobs(); const jClient=document.getElementById('jClient'); if(jClient){ jClient.value=c.id; loadClientDiscount(); } alert('Client added.'); }
+// Helpers
+const findClient=id=>state.clients.find(c=>c.id===id);
 
-function renderTransactions(){ const q=(g('txSearch')?.value||"").toLowerCase(); let rows=state.transactions.slice().reverse(); if(q){ rows=rows.filter(t=>{ const c=state.clients.find(x=>x.id===t.clientId); return [t.type,t.method,t.note,(c?c.name:"")].join(" ").toLowerCase().includes(q); }); } let html=`<table class="table"><thead><tr><th>Date</th><th>Type</th><th>Amount</th><th>Method</th><th>Client</th><th>Note</th></tr></thead><tbody>`; for(const t of rows){ const c=state.clients.find(x=>x.id===t.clientId); html+=`<tr><td>${esc(new Date(t.date).toLocaleString())}</td><td>${esc(t.type)}</td><td>${currency(t.amount)}</td><td>${esc(t.method||"")}</td><td>${esc(c?c.name:"")}</td><td class="small">${esc(t.note||"")}</td></tr>`; } html+=`</tbody></table>`; g('txTable').innerHTML=html; }
-function exportCSV(){ const headers=["date","type","amount","method","client","note"]; const lines=[headers.join(",")]; for(const t of state.transactions){ const c=state.clients.find(x=>x.id===t.clientId); const row=[ new Date(t.date).toISOString(), t.type, t.amount, t.method||"", c?c.name:"", (t.note||"").replace(/,/g,";") ]; lines.push(row.join(",")); } const blob=new Blob([lines.join("\n")], {type:"text/csv"}); download(blob, "polishcrew_transactions.csv"); }
-function renderExpenses(){ const ef=document.getElementById('expenseForm'); ef.innerHTML=`
-  <div class="row"><div><label>Date</label><input id="exDate" type="date" value="${today()}"></div>
-  <div><label>Category</label><select id="exCat"><option>Fuel</option><option>Supplies</option><option>Tools</option><option>Marketing</option><option>Insurance</option><option>Other</option></select></div>
-  <div><label>Vendor</label><input id="exVendor" placeholder="Costco, Chemical Guys, etc."></div></div>
-  <div class="row"><div><label>Amount</label><input id="exAmt" type="number" step="0.01" placeholder="0.00"></div>
-  <div><label>Payment Method</label><input id="exMethod" placeholder="Card / Cash / Bank"></div>
-  <div><label>Notes</label><input id="exNote" placeholder="e.g., towels, APC gallon"></div>
-  <div style="align-self:end"><button class="btn" onclick="saveExpense()">Save Expense</button></div></div>`; renderExpenseTable(); }
-function saveExpense(){ const ex={ id:uid(), date:new Date(g('exDate').value||today()).toISOString(), category:g('exCat').value, vendor:g('exVendor').value.trim(), amount:Number(g('exAmt').value||0), method:g('exMethod').value||"", note:g('exNote').value||""}; state.expenses.push(ex); state.transactions.push({id:uid(), date:ex.date, type:"expense", amount:ex.amount, method:ex.method, clientId:null, note:`${ex.category} — ${ex.vendor}: ${ex.note}`}); save(); renderExpenseTable(); renderTransactions(); refreshKPIs(); alert("Expense saved."); g('exVendor').value=g('exAmt').value=g('exMethod').value=g('exNote').value=""; }
-function renderExpenseTable(){ const q=(g('expSearch')?.value||"").toLowerCase(); let rows=state.expenses.slice().reverse(); if(q){ rows=rows.filter(e=>[e.category,e.vendor,e.method,e.note].join(" ").toLowerCase().includes(q)); } let html=`<table class="table"><thead><tr><th>Date</th><th>Category</th><th>Vendor</th><th>Amount</th><th>Method</th><th>Note</th></tr></thead><tbody>`; for(const e of rows){ html+=`<tr><td>${esc(new Date(e.date).toLocaleDateString())}</td><td>${esc(e.category)}</td><td>${esc(e.vendor)}</td><td>${currency(e.amount)}</td><td>${esc(e.method)}</td><td class="small">${esc(e.note)}</td></tr>`; } html+=`</tbody></table>`; g('expenseTable').innerHTML=html; }
-function renderMileage(){ const mf=document.getElementById('mileageForm'); mf.innerHTML=`<div class="row"><div><label>Date</label><input id="miDate" type="date" value="${today()}"></div><div><label>Miles</label><input id="miMiles" type="number" step="0.1" placeholder="0.0"></div><div><label>Purpose</label><input id="miPurpose" placeholder="Client visit, supply run"></div><div style="align-self:end"><button class="btn" onclick="saveMileage()">Save</button></div></div>`; renderMileageTable(); }
-function saveMileage(){ state.mileage.push({id:uid(), date:new Date(g('miDate').value||today()).toISOString(), miles:Number(g('miMiles').value||0), purpose:g('miPurpose').value||""}); save(); renderMileageTable(); alert("Mileage saved."); g('miMiles').value=g('miPurpose').value=""; }
-function renderMileageTable(){ let rows=state.mileage.slice().reverse(); let html=`<table class="table"><thead><tr><th>Date</th><th>Miles</th><th>Purpose</th></tr></thead><tbody>`; for(const m of rows){ html+=`<tr><td>${esc(new Date(m.date).toLocaleDateString())}</td><td>${m.miles}</td><td class="small">${esc(m.purpose)}</td></tr>`; } html+=`</tbody></table>`; g('mileageTable').innerHTML=html; }
-function exportJSON(){ const blob=new Blob([JSON.stringify(state,null,2)], {type:"application/json"}); download(blob, "polishcrew_backup.json"); }
-function importJSON(file){ const r=new FileReader(); r.onload=()=>{ try{ const data=JSON.parse(r.result); if(!data||!data.menu||!data.transactions) throw new Error("Invalid backup"); state=data; save(); alert("Imported successfully."); const active=document.querySelector('.section.active')?.id||"Dashboard"; go(active);}catch(e){ alert("Import failed: "+e.message); } }; r.readAsText(file); }
-function download(blob, filename){ const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=filename; a.click(); setTimeout(()=>URL.revokeObjectURL(a.href),1000); }
-function g(id){return document.getElementById(id)} function esc(s){return (s==null?"":String(s)).replace(/[&<>"']/g, m=>({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;" }[m]))}
-load(); refreshKPIs(); go("Dashboard");
+// Jobs
+function renderJobs(root){
+  root.innerHTML=`
+    <div class="grid g2">
+      <div class="card">
+        <h2>New Job</h2>
+        <div class="primary-nav">
+          <div style="flex:1"><label>Date</label><input id="jDate" type="date" value="${today()}"></div>
+          <div style="flex:1"><label>Client</label><select id="jClient"><option value="">— Select —</option>${state.clients.map(c=>`<option value="${c.id}">${c.name}</option>`).join("")}</select></div>
+        </div>
+        <div class="primary-nav">
+          <div style="flex:1"><label>Vehicle Size</label><select id="jSize">${BRAND_SIZES.map(s=>`<option>${s}</option>`).join("")}</select></div>
+          <div style="flex:1"><label>Package</label><select id="jPkg">${Object.keys(state.menu.packages).map(k=>`<option>${k}</option>`).join("")}</select></div>
+        </div>
+        <div class="primary-nav">
+          <div style="flex:1"><label>Quoted Base</label><input id="jBase" type="number" step="0.01"></div>
+          <div style="flex:1"><label>Status</label><select id="jStatus"><option>Quoted</option><option>Booked</option><option>In Progress</option><option>Complete</option><option>Paid</option></select></div>
+        </div>
+        <div class="primary-nav">
+          <div style="flex:1"><label>Discount Type</label><select id="jDiscType"><option value="none">None</option><option value="%">% Percent</option><option value="$">$ Amount</option></select></div>
+          <div style="flex:1"><label>Discount Value</label><input id="jDiscValue" type="number" step="0.01"></div>
+        </div>
+        <div class="primary-nav">
+          <button class="btn small" id="jq10">$10 off</button>
+          <button class="btn small" id="jq20">$20 off</button>
+          <button class="btn small" id="jq10p">10% off</button>
+          <button class="btn small" id="jq15p">F&F 15%</button>
+        </div>
+        <h3 style="margin-top:12px">Add-ons</h3>
+        <div id="jAddons"></div>
+        <label>Notes</label><input id="jNotes" placeholder="Vehicle/condition notes…">
+        <div class="primary-nav" style="margin-top:10px">
+          <button class="btn primary" onclick="saveJob()">Save Job</button>
+          <button class="btn" onclick="printQuote()">Print / Save Quote</button>
+        </div>
+        <div class="primary-nav" style="margin-top:10px">
+          <div class="note">Subtotal: <b id="jSub">$0</b></div>
+          <div class="note">Discount: <b id="jDisc">$0</b></div>
+          <div class="note">Total: <b id="jTotal">$0</b></div>
+        </div>
+      </div>
+      <div class="card">
+        <h2>Quick Add Client</h2>
+        <label>Name</label><input id="qcName">
+        <label>Phone</label><input id="qcPhone">
+        <div class="primary-nav">
+          <div style="flex:1"><label>Default Discount Type</label><select id="qcDiscType"><option value="none">None</option><option value="%">% Percent</option><option value="$">$ Amount</option></select></div>
+          <div style="flex:1"><label>Default Discount Value</label><input id="qcDiscValue" type="number" step="0.01"></div>
+        </div>
+        <label>Notes</label><input id="qcNotes" placeholder="Prefers cash, F&F">
+        <div style="margin-top:10px"><button class="btn" onclick="quickAddClient()">Save & Select</button></div>
+      </div>
+    </div>
+    <div class="card" style="margin-top:16px">
+      <h2>Open Jobs</h2>
+      <table><thead><tr><th>Date</th><th>Client</th><th>Job</th><th>Status</th><th class="right">Total</th><th></th></tr></thead><tbody id="jobRows"></tbody></table>
+    </div>`;
+
+  const jClient=$("#jClient"),jSize=$("#jSize"),jPkg=$("#jPkg"),jBase=$("#jBase"),jDiscType=$("#jDiscType"),jDiscValue=$("#jDiscValue");
+  $("#jq10").onclick=()=>{ jDiscType.value="$"; jDiscValue.value=10; sumJob(); };
+  $("#jq20").onclick=()=>{ jDiscType.value="$"; jDiscValue.value=20; sumJob(); };
+  $("#jq10p").onclick=()=>{ jDiscType.value="%"; jDiscValue.value=10; sumJob(); };
+  $("#jq15p").onclick=()=>{ jDiscType.value="%"; jDiscValue.value=15; sumJob(); };
+  jClient.onchange=()=>{ const c=findClient(jClient.value); if(c && c.discount && c.discount.type!=="none"){ jDiscType.value=c.discount.type; jDiscValue.value=c.discount.value; } else { jDiscType.value="none"; jDiscValue.value=""; } sumJob(); };
+
+  function refreshBase(){ const idx=BRAND_SIZES.indexOf(jSize.value); const price=state.menu.packages[jPkg.value]?.[idx] ?? 0; jBase.value=price; sumJob(); }
+  function buildAddons(){
+    const idx=BRAND_SIZES.indexOf(jSize.value);
+    const box=$("#jAddons");
+    box.innerHTML = Object.entries(state.menu.addons).map(([n,a])=>{
+      const p=a[idx]??0;
+      return `<div class="addon">
+        <div class="name">${n}</div>
+        <div class="price-wrap"><input type="checkbox" data-name="${n}" data-price="${p}"> select</div>
+        <input type="number" step="0.01" value="${p}" data-adj title="Adjust price">
+      </div>`;
+    }).join("");
+    $$("#jAddons [data-adj]").forEach(inp=>{
+      inp.oninput=e=>{ const row=e.target.closest(".addon"); const cb=row.querySelector('input[type="checkbox"]'); cb.dataset.price=Number(e.target.value||0); sumJob(); };
+    });
+    $$("#jAddons input[type=checkbox]").forEach(cb=>cb.onchange=sumJob);
+  }
+  function sumJob(){
+    const base=Number(jBase.value||0);
+    const add=$$("#jAddons input[type=checkbox]:checked").map(cb=>Number(cb.dataset.price||0)).reduce((a,b)=>a+b,0);
+    const sub=base+add; const t=jDiscType.value, v=Number(jDiscValue.value||0);
+    let disc=0; if(t==="%")disc=+(sub*(v/100)).toFixed(2); else if(t==="$")disc=Math.min(sub,v);
+    $("#jSub").textContent=fmt(sub); $("#jDisc").textContent="-"+fmt(disc); $("#jTotal").textContent=fmt(sub-disc);
+  }
+  jSize.onchange=()=>{ refreshBase(); buildAddons(); };
+  jPkg.onchange=refreshBase; jBase.oninput=sumJob; jDiscType.onchange=sumJob; jDiscValue.oninput=sumJob;
+  refreshBase(); buildAddons(); sumJob();
+  renderJobRows();
+}
+function quickAddClient(){
+  const name=$("#qcName").value.trim(); if(!name){ alert("Name required"); return; }
+  const c={ id:uid(), name, phone:$("#qcPhone").value.trim(), notes:$("#qcNotes").value.trim(),
+            discount:{ type:$("#qcDiscType").value, value:Number($("#qcDiscValue").value||0) } };
+  state.clients.push(c); save(); alert("Client added.");
+  const sel=$("#jClient"); if(sel){ sel.innerHTML='<option value="">— Select —</option>'+ state.clients.map(x=>`<option value="${x.id}">${x.name}</option>`).join(""); sel.value=c.id; sel.dispatchEvent(new Event('change')); }
+  $("#qcName").value=$("#qcPhone").value=$("#qcNotes").value=$("#qcDiscValue").value=""; $("#qcDiscType").value="none";
+}
+function renderJobRows(){
+  const tb=$("#jobRows"); if(!tb) return;
+  const open=state.jobs.filter(j=>j.status!=="Paid");
+  tb.innerHTML = open.map(j=>`
+    <tr>
+      <td>${j.date}</td>
+      <td>${findClient(j.clientId)?.name||"-"}</td>
+      <td>${j.pkg} — ${j.size}</td>
+      <td>
+        <select onchange="updateJobStatus('${j.id}', this.value)">
+          ${["Quoted","Booked","In Progress","Complete","Paid"].map(s=>`<option ${s===j.status?"selected":""}>${s}</option>`).join("")}
+        </select>
+      </td>
+      <td class="right">${fmt(j.total)}</td>
+      <td><button class="btn small" onclick="printQuote('${j.id}')">Quote</button><button class="btn small" onclick="takePayment('${j.id}')">Take Payment</button></td>
+    </tr>`).join("");
+}
+function calcJobTotals(job){
+  const base=Number(job.base||0);
+  const add=(job.addons||[]).reduce((a,b)=>a+Number(b.price||0),0);
+  const sub=base+add; let disc=0;
+  if(job.discType==="%")disc=+(sub*(Number(job.discValue||0)/100)).toFixed(2);
+  else if(job.discType==="$")disc=Math.min(sub, Number(job.discValue||0));
+  return { sub, disc, total: sub - disc };
+}
+function saveJob(){
+  const job={ id:uid(), date: $("#jDate").value||today(), clientId: $("#jClient").value||"", size: $("#jSize").value,
+              pkg: $("#jPkg").value, base: Number($("#jBase").value||0), status: $("#jStatus").value,
+              discType: $("#jDiscType").value, discValue: Number($("#jDiscValue").value||0),
+              notes: $("#jNotes")?.value?.trim() || "", addons: $$("#jAddons input[type=checkbox]:checked").map(cb=>({name:cb.dataset.name,price:Number(cb.dataset.price||0)})), payments: [] };
+  const sums=calcJobTotals(job); job.subtotal=sums.sub; job.discount=sums.disc; job.total=sums.total;
+  state.jobs.push(job); save(); alert("Job saved."); renderJobs($("#view"));
+}
+function updateJobStatus(id,status){
+  const j=state.jobs.find(x=>x.id===id); if(!j) return;
+  j.status=status; save(); if(status==="Paid"){ takePayment(id); } else { renderJobRows(); }
+}
+function takePayment(id){
+  const j=state.jobs.find(x=>x.id===id); if(!j) return;
+  const method=prompt("Payment method? (Cash/Card/Zelle/Venmo/CashApp/Bank)","Cash"); if(method===null) return;
+  const amtStr=prompt("Amount collected (default = job total)", (j.total||0).toFixed(2)); if(amtStr===null) return;
+  const amount=Number(amtStr||0); if(!(amount>0)){ alert("Invalid amount."); return; }
+  j.payments.push({date: today(), method, amount});
+  const paid = j.payments.reduce((a,b)=>a+b.amount,0);
+  if(paid >= (j.total||0) - 0.01){
+    j.status="Paid";
+    state.transactions.push({ id:uid(), type:"Income", date: today(), clientId: j.clientId, category:"Package", item:`${j.pkg} — ${j.size}`, payment: method, amount:+amount.toFixed(2), notes:`Job ${j.id} | Discount: -${fmt(j.discount)} | Total: ${fmt(j.total)}` });
+    save(); alert("Payment recorded and sale posted.");
+  } else { save(); alert("Partial payment recorded ("+fmt(paid)+" of "+fmt(j.total)+")."); }
+  renderJobRows();
+}
+function printQuote(id){
+  let j;
+  if(id){ j=state.jobs.find(x=>x.id===id); }
+  else {
+    j={ date: $("#jDate").value||today(), clientId: $("#jClient").value||"", size: $("#jSize").value, pkg: $("#jPkg").value,
+        base: Number($("#jBase").value||0), discType: $("#jDiscType").value, discValue: Number($("#jDiscValue").value||0),
+        addons: $$("#jAddons input[type=checkbox]:checked").map(cb=>({name:cb.dataset.name, price:Number(cb.dataset.price||0)})), notes: $("#jNotes")?.value?.trim() || "" };
+    const sums=calcJobTotals(j); j.subtotal=sums.sub; j.discount=sums.disc; j.total=sums.total;
+  }
+  const c = findClient(j.clientId);
+  const w=window.open("","_blank");
+  w.document.write('<html><head><meta charset="utf-8"><title>Quote</title><style>body{font-family:Inter,system-ui,Arial;margin:24px;color:#111}h1{margin:0 0 8px 0;font-size:20px}.green{color:#00A651}.right{text-align:right}table{width:100%;border-collapse:collapse;margin-top:12px}th,td{border-bottom:1px solid #ddd;padding:8px 6px;text-align:left}.totals td{border:0}.muted{color:#666}</style></head><body>');
+  w.document.write('<h1><span class="green">'+ (state.business.name||"Polish Crew") +'</span> — Quote</h1>');
+  w.document.write('<div><b>Client:</b> '+ (c?.name||"-") + (c?.phone? " · "+c.phone:"") +'</div>');
+  w.document.write('<div><b>Date:</b> '+ j.date +'</div>');
+  w.document.write('<div><b>Job:</b> '+ j.pkg +' — '+ j.size +'</div>');
+  w.document.write('<table><thead><tr><th>Description</th><th class="right">Price</th></tr></thead><tbody>');
+  w.document.write('<tr><td>Base Package</td><td class="right">'+ fmt(j.base) +'</td></tr>');
+  (j.addons||[]).forEach(a=> w.document.write('<tr><td>'+a.name+'</td><td class="right">'+fmt(a.price)+'</td></tr>') );
+  w.document.write('</tbody><tfoot class="totals">');
+  w.document.write('<tr><td class="right"><b>Subtotal</b></td><td class="right">'+fmt(j.subtotal)+'</td></tr>');
+  w.document.write('<tr><td class="right">Discount</td><td class="right">-'+fmt(j.discount)+'</td></tr>');
+  w.document.write('<tr><td class="right"><b>Total</b></td><td class="right"><b>'+fmt(j.total)+'</b></td></tr>');
+  w.document.write('</tfoot></table>');
+  w.document.write('<p class="muted">Notes: '+ (j.notes||"-") +'</p>');
+  w.document.write('<p class="muted">Payment due upon completion. Cash/Card/Zelle/Venmo accepted.</p>');
+  w.document.write('<script>window.print()</'+'script></body></html>');
+  w.document.close();
+}
+
+// Clients
+function renderClients(root){
+  root.innerHTML=`<div class="grid g2">
+    <div class="card"><h2>Clients</h2><table><thead><tr><th>Name</th><th>Phone</th><th>Disc</th><th>Notes</th><th></th></tr></thead><tbody id="cRows"></tbody></table></div>
+    <div class="card"><h2>Add Client</h2><label>Name</label><input id="cName"/><label>Phone</label><input id="cPhone"/><div class="primary-nav"><div style="flex:1"><label>Default Discount Type</label><select id="cDiscType"><option value="none">None</option><option value="%">% Percent</option><option value="$">$ Amount</option></select></div><div style="flex:1"><label>Default Discount Value</label><input id="cDiscValue" type="number" step="0.01"></div></div><label>Notes</label><input id="cNotes"/><div style="margin-top:10px"><button class="btn primary" onclick="saveClient()">Save Client</button></div></div>
+  </div>`;
+  renderClientRows();
+}
+function renderClientRows(){
+  $("#cRows").innerHTML = state.clients.map(c=>`<tr>
+    <td>${c.name}</td><td>${c.phone||"-"}</td>
+    <td>${!c.discount||c.discount.type==="none"?"-":(c.discount.type==="%"? c.discount.value+"%":"$"+Number(c.discount.value||0).toFixed(2))}</td>
+    <td>${c.notes||"-"}</td>
+    <td><button class="btn small" onclick="removeClient('${c.id}')">Delete</button></td>
+  </tr>`).join("");
+}
+function saveClient(){
+  const name=$("#cName").value.trim(); if(!name){ alert("Name required"); return; }
+  state.clients.push({ id:uid(), name, phone:$("#cPhone").value.trim(), notes:$("#cNotes").value.trim(), discount:{ type:$("#cDiscType").value, value:Number($("#cDiscValue").value||0) } });
+  save(); renderClientRows(); $("#cName").value=$("#cPhone").value=$("#cNotes").value=$("#cDiscValue").value=""; $("#cDiscType").value="none";
+}
+function removeClient(id){ state.clients = state.clients.filter(c=>c.id!==id); save(); renderClientRows(); }
+
+// Expenses
+function renderExpense(root){
+  root.innerHTML=`<div class="grid g2"><div class="card"><h2>New Expense</h2>
+    <div class="primary-nav"><div style="flex:1"><label>Date</label><input id="xDate" type="date" value="${today()}"></div>
+    <div style="flex:1"><label>Category</label><select id="xCat">${state.settings.categories.filter(c=>!["Package","Add-on"].includes(c)).map(c=>`<option>${c}</option>`).join("")}</select></div></div>
+    <label>Vendor</label><input id="xVendor" placeholder="e.g., Costco Gas, AutoZone">
+    <div class="primary-nav"><div style="flex:1"><label>Amount</label><input id="xAmt" type="number" step="0.01"></div>
+    <div style="flex:1"><label>Payment Method</label><select id="xPay">${state.settings.paymentMethods.map(p=>`<option>${p}</option>`).join("")}</select></div></div>
+    <label>Notes</label><input id="xNotes" placeholder="e.g., 12.4 gal, foam cannon">
+    <div style="margin-top:10px"><button class="btn primary" onclick="saveExpense()">Save Expense</button></div></div></div>`;
+}
+function saveExpense(){
+  const date=$("#xDate").value||today(), category=$("#xCat").value||"Other", vendor=$("#xVendor").value.trim()||"-";
+  const amount=Number($("#xAmt").value||0), payment=$("#xPay").value||"", notes=$("#xNotes").value.trim();
+  if(!(amount>0)){ alert("Enter a valid amount."); return; }
+  state.transactions.push({ id:uid(), type:"Expense", date, vendor, category, item:category, payment, amount:+amount.toFixed(2), notes });
+  save(); alert("Saved expense: "+fmt(amount)); currentTab="dashboard"; render();
+}
+
+// Transactions
+function renderTransactions(root){
+  root.innerHTML=`<div class="card"><h2>Transactions</h2>
+  <div class="primary-nav"><input id="fTxt" placeholder="Search..." style="flex:2"><input id="fFrom" type="date" style="flex:1"><input id="fTo" type="date" style="flex:1"><select id="fType" style="flex:1"><option value="">All</option><option>Income</option><option>Expense</option></select><button class="btn" onclick="renderTxTable()">Filter</button><button class="btn" onclick="exportCSV()">Export CSV</button></div>
+  <div class="card" style="margin-top:12px"><table><thead><tr><th>Date</th><th>Type</th><th>Category</th><th>Item</th><th>Client/Vendor</th><th>Payment</th><th class="right">Amount</th><th></th></tr></thead><tbody id="txRows"></tbody></table></div></div>`;
+  renderTxTable();
+}
+function renderTxTable(){
+  const q=($("#fTxt")?.value||"").toLowerCase(), from=$("#fFrom")?.value, to=$("#fTo")?.value, t=$("#fType")?.value||"";
+  let items=state.transactions; const clientName = t => (state.clients.find(c=>c.id===t.clientId)?.name||"");
+  if(q){ items=items.filter(t=> (t.notes||"").toLowerCase().includes(q)||(t.item||"").toLowerCase().includes(q)||(t.vendor||"").toLowerCase().includes(q)||clientName(t).toLowerCase().includes(q)); }
+  if(t) items=items.filter(x=>x.type===t); if(from) items=items.filter(x=>x.date>=from); if(to) items=items.filter(x=>x.date<=to);
+  $("#txRows").innerHTML = items.map(t=>`<tr>
+    <td>${t.date}</td><td>${t.type}</td><td>${t.category||"-"}</td><td>${t.item||"-"}</td>
+    <td>${t.type==="Expense"?(t.vendor||"-"):clientName(t)}</td>
+    <td>${t.payment||"-"}</td><td class="right">${fmt(t.amount)}</td><td><button class="btn small" onclick="delTx('${t.id}')">Delete</button></td>
+  </tr>`).join("");
+}
+function delTx(id){ if(!confirm("Delete this transaction?")) return; state.transactions=state.transactions.filter(t=>t.id!==id); save(); renderTxTable(); }
+
+// Mileage
+function renderMileage(root){
+  root.innerHTML=`<div class="grid g2"><div class="card"><h2>Mileage Log</h2><table><thead><tr><th>Date</th><th>From</th><th>To</th><th>Purpose</th><th class="right">Miles</th><th></th></tr></thead><tbody id="miRows"></tbody></table></div><div class="card"><h2>Add Mileage</h2><label>Date</label><input id="mDate" type="date" value="${today()}"><label>From</label><input id="mFrom"><label>To</label><input id="mTo"><label>Purpose</label><input id="mWhy"><label>Miles</label><input id="mMiles" type="number" step="0.1"><div style="margin-top:10px"><button class="btn primary" onclick="addMileage()">Save Mileage</button></div></div></div>`;
+  renderMileageRows();
+}
+function renderMileageRows(){ $("#miRows").innerHTML = state.mileage.map(m=>`<tr><td>${m.date}</td><td>${m.from}</td><td>${m.to}</td><td>${m.why}</td><td class="right">${m.miles}</td><td><button class="btn small" onclick="removeMileage('${m.id}')">Delete</button></td></tr>`).join(""); }
+function addMileage(){ const rec={ id:uid(), date:$("#mDate").value||today(), from:$("#mFrom").value.trim(), to:$("#mTo").value.trim(), why:$("#mWhy").value.trim(), miles:Number($("#mMiles").value||0) }; state.mileage.push(rec); save(); renderMileageRows(); $("#mFrom").value=$("#mTo").value=$("#mWhy").value=$("#mMiles").value=""; }
+function removeMileage(id){ state.mileage=state.mileage.filter(m=>m.id!==id); save(); renderMileageRows(); }
+
+// Menu
+function renderMenu(root){
+  root.innerHTML=`<div class="card"><h2>Packages</h2><table><thead><tr><th>Package</th>${BRAND_SIZES.map(s=>`<th>${s}</th>`).join("")}<th></th></tr></thead><tbody id="pkgRows"></tbody></table><div style="margin-top:10px"><button class="btn" onclick="resetMenu()">Reset to Defaults</button><button class="btn primary" onclick="saveMenu()">Save Changes</button></div></div><div class="card" style="margin-top:16px"><h2>Add-ons & Protection</h2><table><thead><tr><th>Add-on</th>${BRAND_SIZES.map(s=>`<th>${s}</th>`).join("")}<th></th></tr></thead><tbody id="addonRows"></tbody></table><div style="margin-top:10px"><button class="btn primary" onclick="saveMenu()">Save Changes</button></div><div class="note" style="margin-top:8px">Guideline: ${state.menu.guidance}</div></div>`;
+  $("#pkgRows").innerHTML = Object.entries(state.menu.packages).map(([n,a])=>`<tr><td>${n}</td>${a.map((v,i)=>`<td><input type="number" step="0.01" data-kind="pkg" data-name="${n}" data-idx="${i}" value="${v}"></td>`).join("")}<td><button class="btn small" onclick="removePkg('${n}')">Delete</button></td></tr>`).join("");
+  $("#addonRows").innerHTML = Object.entries(state.menu.addons).map(([n,a])=>`<tr><td>${n}</td>${a.map((v,i)=>`<td><input type="number" step="0.01" data-kind="addon" data-name="${n}" data-idx="${i}" value="${v}"></td>`).join("")}<td><button class="btn small" onclick="removeAddon('${n}')">Delete</button></td></tr>`).join("");
+}
+function saveMenu(){ $$('input[data-kind="pkg"]').forEach(inp=>{ state.menu.packages[inp.dataset.name][+inp.dataset.idx]=Number(inp.value||0); }); $$('input[data-kind="addon"]').forEach(inp=>{ state.menu.addons[inp.dataset.name][+inp.dataset.idx]=Number(inp.value||0); }); save(); alert("Menu saved."); }
+function resetMenu(){ if(confirm("Reset to default menu?")){ state.menu=JSON.parse(JSON.stringify(DEFAULT_MENU)); save(); renderMenu($("#view")); } }
+function removePkg(n){ delete state.menu.packages[n]; save(); renderMenu($("#view")); }
+function removeAddon(n){ delete state.menu.addons[n]; save(); renderMenu($("#view")); }
+
+// Backup
+function renderBackup(root){
+  root.innerHTML=`<div class="grid g2"><div class="card"><h2>Export</h2><p class="note">Save a backup JSON / CSV to your USB.</p><div class="primary-nav"><button class="btn" onclick="exportJSON()">Export JSON</button><button class="btn" onclick="exportCSV()">Export CSV (transactions)</button></div></div><div class="card"><h2>Import</h2><p class="note">Restore from JSON backup.</p><input type="file" id="importFile" accept=".json"><div style="margin-top:10px"><button class="btn" onclick="importJSON()">Import JSON</button></div></div></div>`;
+}
+function exportJSON(){ const blob=new Blob([JSON.stringify(state,null,2)],{type:"application/json"}); const a=document.createElement("a"); a.href=URL.createObjectURL(blob); a.download="polishcrew_whitelabel_backup.json"; a.click(); }
+function exportCSV(){ const heads=["date","type","category","item","client","vendor","payment","amount","notes"]; const out=[heads.join(",")]; for(const t of state.transactions){ const row=[ t.date, t.type, t.category||"", t.item||"", (state.clients.find(c=>c.id===t.clientId)?.name||"").replace(/,/g,";"), (t.vendor||"").replace(/,/g,";"), t.payment||"", Number(t.amount||0).toFixed(2), (t.notes||"").replace(/[\r\n,]/g,";") ]; out.push(row.join(",")); } const blob=new Blob([out.join("\n")],{type:"text/csv"}); const a=document.createElement("a"); a.href=URL.createObjectURL(blob); a.download="transactions.csv"; a.click(); }
+  const out2=[heads.join(",")]; for(const t of state.transactions){ const row=[ t.date, t.type, t.category or "", t.item or "", (state.clients.find(c=>c.id===t.clientId).name if state.clients and state.clients[0] else "").replace(",", ";") if (state.clients and state.clients[0]) else (state.clients.find(c=>c.id===t.clientId).name if state.clients else ""), (t.vendor or "").replace(",", ";"), t.payment or "", f"{float(t.amount or 0):.2f}", (t.notes or "").replace(",", ";").replace("\\n",";") ]; out2.append(",".join(row)) }
+}
 </script>
 </body>
 </html>
